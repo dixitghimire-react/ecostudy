@@ -1,0 +1,190 @@
+@{
+    ViewData["Title"] = "Home - Economics Study Portal";
+}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-glow"></div>
+    <div class="container position-relative">
+        <div class="row align-items-center gy-5">
+            <div class="col-lg-7">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-white bg-opacity-10 border border-white border-opacity-20 text-info small mb-3">
+                    <i class="bi bi-mortarboard-fill"></i>
+                    <span>Phase 1 Architecture Active &bull; ASP.NET Core &amp; .NET 8</span>
+                </div>
+                <h1 class="hero-title">
+                    Master Economics with <span>Precision &amp; Clarity</span>
+                </h1>
+                <p class="lead text-light text-opacity-75 mb-4">
+                    EcoStudy is a dedicated academic portal for Economics learners and educators. Access verified chapter notes, syllabus breakdowns, and high-yield board examination questions.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-primary-custom btn-lg rounded-pill px-4">
+                        <i class="bi bi-person-plus-fill me-1"></i> Register as Student
+                    </a>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light btn-lg rounded-pill px-4">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to Portal
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="p-4 rounded-4 border border-white border-opacity-10 shadow-lg" style="background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px);">
+                    <div class="d-flex align-items-center justify-content-between mb-3 border-bottom border-white border-opacity-10 pb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-key-fill text-warning fs-5"></i>
+                            <h6 class="text-white fw-bold mb-0">Quick Demo Accounts</h6>
+                        </div>
+                        <span class="badge bg-success">Ready</span>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        <div class="p-3 rounded-3 bg-white bg-opacity-5 border border-white border-opacity-10">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-primary">Teacher Role</span>
+                                <small class="text-secondary font-monospace">Teacher@123</small>
+                            </div>
+                            <div class="text-white fw-semibold small">teacher@ecostudy.com</div>
+                            <div class="text-light text-opacity-50 small mt-1">Full faculty dashboard, chapter management &amp; student roster</div>
+                        </div>
+
+                        <div class="p-3 rounded-3 bg-white bg-opacity-5 border border-white border-opacity-10">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-info text-dark">Student Role</span>
+                                <small class="text-secondary font-monospace">Student@123</small>
+                            </div>
+                            <div class="text-white fw-semibold small">student@ecostudy.com</div>
+                            <div class="text-light text-opacity-50 small mt-1">Student study desk, revision notes, &amp; question bank</div>
+                        </div>
+
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-info w-100 fw-bold rounded-3">
+                            <i class="bi bi-lightning-charge-fill me-1"></i> Test Portals Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Core Portals Overview -->
+<section class="py-5 bg-light">
+    <div class="container py-4">
+        <div class="text-center max-w-700 mx-auto mb-5">
+            <h6 class="text-primary fw-bold text-uppercase tracking-wider small mb-2">Role-Based Experience</h6>
+            <h2 class="fw-bold text-dark">Tailored Environments for Faculty &amp; Students</h2>
+            <p class="text-muted">EcoStudy enforces strict role authorization to deliver specialized workspaces.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Teacher Card -->
+            <div class="col-md-6">
+                <div class="custom-card h-100 p-4 border-primary border-opacity-25">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="stat-icon-wrapper icon-purple mb-0">
+                            <i class="bi bi-person-workspace"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-primary mb-1">Educators</span>
+                            <h4 class="fw-bold text-dark mb-0">Teacher Workspace</h4>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-4">
+                        Teachers have dedicated management tools to oversee economics curriculum chapters, author rich revision notes, publish high-yield questions with solution outlines, and view registered students.
+                    </p>
+                    <ul class="list-unstyled d-flex flex-column gap-2 small text-secondary mb-4">
+                        <li><i class="bi bi-check2-circle text-primary me-2"></i>Executive Metrics &amp; Analytics Dashboard</li>
+                        <li><i class="bi bi-check2-circle text-primary me-2"></i>Curriculum Chapter &amp; Unit Organization</li>
+                        <li><i class="bi bi-check2-circle text-primary me-2"></i>Faculty Study Notes Publishing</li>
+                        <li><i class="bi bi-check2-circle text-primary me-2"></i>High-Yield Board Question Bank</li>
+                        <li><i class="bi bi-check2-circle text-primary me-2"></i>Registered Student Directory</li>
+                    </ul>
+                    <div class="mt-auto">
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary w-100 fw-semibold">
+                            Teacher Sign In <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Card -->
+            <div class="col-md-6">
+                <div class="custom-card h-100 p-4 border-info border-opacity-25">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="stat-icon-wrapper icon-blue mb-0">
+                            <i class="bi bi-mortarboard"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-info text-dark mb-1">Learners</span>
+                            <h4 class="fw-bold text-dark mb-0">Student Study Desk</h4>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-4">
+                        Students access a distraction-free learning space. Self-register, navigate syllabus chapters, study verified notes, test understanding on important questions, and maintain profile details.
+                    </p>
+                    <ul class="list-unstyled d-flex flex-column gap-2 small text-secondary mb-4">
+                        <li><i class="bi bi-check2-circle text-info me-2"></i>Interactive Study Overview &amp; Tracking</li>
+                        <li><i class="bi bi-check2-circle text-info me-2"></i>Structured Micro &amp; Macro Economics Chapters</li>
+                        <li><i class="bi bi-check2-circle text-info me-2"></i>Chapter-Wise Study Notes Reader</li>
+                        <li><i class="bi bi-check2-circle text-info me-2"></i>Important Questions with Difficulty Filters</li>
+                        <li><i class="bi bi-check2-circle text-info me-2"></i>Personal Student Profile Management</li>
+                    </ul>
+                    <div class="mt-auto">
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-primary-custom w-100 fw-semibold">
+                            Student Registration <i class="bi bi-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Curriculum Highlights -->
+<section class="py-5 bg-white">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <h6 class="text-primary fw-bold text-uppercase tracking-wider small mb-2">Subject Coverage</h6>
+            <h2 class="fw-bold text-dark">Comprehensive Economics Syllabus</h2>
+            <p class="text-muted">Structured around core Microeconomics and Macroeconomics principles.</p>
+        </div>
+
+        <div class="row g-4 text-center">
+            <div class="col-lg-3 col-sm-6">
+                <div class="p-4 rounded-4 bg-light border h-100">
+                    <div class="stat-icon-wrapper icon-purple mx-auto">
+                        <i class="bi bi-diagram-3"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Microeconomics</h5>
+                    <p class="text-muted small mb-0">Consumer behaviour, production, costs, revenue, and market equilibrium structures.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+                <div class="p-4 rounded-4 bg-light border h-100">
+                    <div class="stat-icon-wrapper icon-blue mx-auto">
+                        <i class="bi bi-currency-exchange"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Macroeconomics</h5>
+                    <p class="text-muted small mb-0">National income accounting, circular flow of income, aggregate demand and supply.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+                <div class="p-4 rounded-4 bg-light border h-100">
+                    <div class="stat-icon-wrapper icon-emerald mx-auto">
+                        <i class="bi bi-bank2"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">Money &amp; Banking</h5>
+                    <p class="text-muted small mb-0">Functions of money, credit creation by commercial banks, and central bank tools.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6">
+                <div class="p-4 rounded-4 bg-light border h-100">
+                    <div class="stat-icon-wrapper icon-amber mx-auto">
+                        <i class="bi bi-patch-question"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark">High-Yield Prep</h5>
+                    <p class="text-muted small mb-0">Board and annual examination questions tagged by difficulty with key point hints.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

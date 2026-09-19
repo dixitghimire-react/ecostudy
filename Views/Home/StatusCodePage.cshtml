@@ -1,0 +1,84 @@
+@{
+    int statusCode = ViewBag.StatusCode ?? 404;
+    ViewData["Title"] = $"{statusCode} - Error";
+    Layout = User.Identity?.IsAuthenticated == true ? "_DashboardLayout" : "_Layout";
+
+    var isTeacher = User.IsInRole("Teacher");
+    var dashboardUrl = isTeacher ? Url.Action("Dashboard", "Teacher") : Url.Action("Dashboard", "Student");
+
+    string title;
+    string subtitle;
+    string icon;
+    string description;
+
+    switch (statusCode)
+    {
+        case 404:
+            title = "404 — Page Not Found";
+            subtitle = "Resource Scarcity Detected";
+            icon = "bi-compass";
+            description = "Like an economy facing fundamental resource scarcity, the page, document, or chapter you requested could not be located in our portal.";
+            break;
+        case 403:
+            title = "403 — Access Restricted";
+            subtitle = "Regulatory Authorization Required";
+            icon = "bi-shield-lock";
+            description = "You do not have the required permissions or role authorization to access this specific academic resource.";
+            break;
+        case 500:
+            title = "500 — Server Disequilibrium";
+            subtitle = "Internal Economic Shock";
+            icon = "bi-cpu";
+            description = "An unexpected server condition occurred. Our technical team has been notified to restore system equilibrium.";
+            break;
+        default:
+            title = $"{statusCode} — Unexpected Condition";
+            subtitle = "System Notice";
+            icon = "bi-exclamation-octagon";
+            description = "The requested action could not be processed as expected.";
+            break;
+    }
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9 text-center">
+            <div class="custom-card p-5 shadow-lg">
+                <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-4 d-inline-flex align-items-center justify-content-center mb-4" style="width: 90px; height: 90px;">
+                    <i class="bi @icon display-4"></i>
+                </div>
+
+                <div class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-1 rounded-pill mb-2 fw-semibold">
+                    HTTP Error @statusCode
+                </div>
+
+                <h2 class="fw-bold text-dark mb-2">@title</h2>
+                <h5 class="text-primary mb-3">@subtitle</h5>
+                <p class="text-secondary mb-4" style="line-height: 1.7; font-size: 1.05rem;">
+                    @description
+                </p>
+
+                <div class="d-flex flex-wrap justify-content-center gap-3 pt-3 border-top">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a href="@dashboardUrl" class="btn btn-primary-custom px-4 py-2 d-flex align-items-center gap-2">
+                            <i class="bi bi-speedometer2"></i> Return to Dashboard
+                        </a>
+                        <a asp-controller="Home" asp-action="Search" class="btn btn-outline-secondary px-4 py-2 d-flex align-items-center gap-2">
+                            <i class="bi bi-search"></i> Search Portal
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-primary-custom px-4 py-2 d-flex align-items-center gap-2">
+                            <i class="bi bi-house"></i> Return Home
+                        </a>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary px-4 py-2 d-flex align-items-center gap-2">
+                            <i class="bi bi-box-arrow-in-right"></i> Log In
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

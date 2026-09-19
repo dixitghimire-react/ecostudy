@@ -1,0 +1,151 @@
+@model EcoStudy.Models.ImportantQuestion
+
+@{
+    ViewData["Title"] = "Add Important Question";
+    Layout = "_DashboardLayout";
+    var chapters = ViewBag.Chapters as List<EcoStudy.Models.Chapter> ?? new List<EcoStudy.Models.Chapter>();
+}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a asp-controller="Teacher" asp-action="Dashboard" class="text-decoration-none">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Teacher" asp-action="ImportantQuestions" class="text-decoration-none">Important Questions</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Add Question</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="custom-card p-4 p-md-5">
+            <!-- Header -->
+            <div class="d-flex align-items-center gap-3 pb-4 border-bottom mb-4">
+                <div class="rounded-4 bg-primary bg-opacity-10 text-primary p-3 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+                    <i class="bi bi-patch-question-fill fs-3"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">Add Important Question</h3>
+                    <p class="text-muted small mb-0">Create a high-yield exam question categorized as Short, Long, or Numerical.</p>
+                </div>
+            </div>
+
+            <form asp-controller="Teacher" asp-action="AddQuestion" method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 small mb-4" role="alert"></div>
+
+                <!-- Chapter and Question Type Row -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="ChapterId" class="form-label fw-bold small text-secondary">
+                            Chapter <span class="text-danger">*</span>
+                        </label>
+                        <select asp-for="ChapterId" class="form-select form-control-lg fs-6" required>
+                            <option value="">-- Select Chapter --</option>
+                            @foreach (var ch in chapters)
+                            {
+                                <option value="@ch.Id" selected="@(Model.ChapterId == ch.Id)">
+                                    Chapter @ch.ChapterNumber: @ch.Name
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="ChapterId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="QuestionType" class="form-label fw-bold small text-secondary">
+                            Question Type <span class="text-danger">*</span>
+                        </label>
+                        <select asp-for="QuestionType" class="form-select form-control-lg fs-6" required id="questionTypeSelect">
+                            <option value="Short" selected="@(Model.QuestionType == "Short")">📝 Short Question (Definitions, Concepts)</option>
+                            <option value="Long" selected="@(Model.QuestionType == "Long")">📄 Long Question (Analysis, Derivations)</option>
+                            <option value="Numerical" selected="@(Model.QuestionType == "Numerical")">🔢 Numerical Question (Calculations, Schedules)</option>
+                        </select>
+                        <span asp-validation-for="QuestionType" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Question Text -->
+                <div class="mb-4">
+                    <label asp-for="Question" class="form-label fw-bold small text-secondary">
+                        Question Statement <span class="text-danger">*</span>
+                    </label>
+                    <textarea asp-for="Question" class="form-control" rows="4" placeholder="Enter complete question statement (e.g. 'Explain consumer equilibrium using Indifference Curve technique with a neat diagram.')" required></textarea>
+                    <span asp-validation-for="Question" class="text-danger small"></span>
+                    <div class="form-text small text-muted">Clear and unambiguous statement. For numerical questions, include all given parameters and units.</div>
+                </div>
+
+                <!-- Marks, Difficulty, and Exam Reference Row -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label asp-for="Marks" class="form-label fw-bold small text-secondary">
+                            Marks Weightage <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-star"></i></span>
+                            <input asp-for="Marks" type="number" class="form-control" min="1" max="50" required id="marksInput" />
+                        </div>
+                        <span asp-validation-for="Marks" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="DifficultyLevel" class="form-label fw-bold small text-secondary">Difficulty Level</label>
+                        <select asp-for="DifficultyLevel" class="form-select">
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                        <span asp-validation-for="DifficultyLevel" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="ExamReference" class="form-label fw-bold small text-secondary">Exam Reference / Year</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-tag"></i></span>
+                            <input asp-for="ExamReference" class="form-control" placeholder="e.g. Board Exam 2023" />
+                        </div>
+                        <span asp-validation-for="ExamReference" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Answer Hint / Solution Key -->
+                <div class="mb-4">
+                    <label asp-for="AnswerHint" class="form-label fw-bold small text-secondary">
+                        <i class="bi bi-lightbulb text-warning me-1"></i> Solution Outline / Key Points / Steps
+                    </label>
+                    <textarea asp-for="AnswerHint" class="form-control" rows="3" placeholder="Provide key points, core definitions, formulas, or steps to guide students."></textarea>
+                    <span asp-validation-for="AnswerHint" class="text-danger small"></span>
+                    <div class="form-text small text-muted">This hint helps students self-evaluate their answers against key scoring parameters.</div>
+                </div>
+
+                <!-- Form Action Buttons -->
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <a asp-controller="Teacher" asp-action="ImportantQuestions" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary-custom px-4 py-2">
+                        <i class="bi bi-check-lg me-1"></i> Save Question
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Helpful helper to adjust default marks when question type changes
+        document.getElementById('questionTypeSelect')?.addEventListener('change', function() {
+            var marksInput = document.getElementById('marksInput');
+            if (!marksInput) return;
+            if (this.value === 'Short') {
+                marksInput.value = '2';
+            } else if (this.value === 'Long') {
+                marksInput.value = '6';
+            } else if (this.value === 'Numerical') {
+                marksInput.value = '4';
+            }
+        });
+    </script>
+}

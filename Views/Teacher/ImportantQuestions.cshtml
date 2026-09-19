@@ -1,0 +1,271 @@
+@model IEnumerable<EcoStudy.Models.ImportantQuestion>
+
+@{
+    ViewData["Title"] = "Important Questions Management";
+    Layout = "_DashboardLayout";
+
+    var chapters = ViewBag.Chapters as List<EcoStudy.Models.Chapter> ?? new List<EcoStudy.Models.Chapter>();
+    int? selectedChapterId = ViewBag.SelectedChapterId;
+    string? selectedQuestionType = ViewBag.SelectedQuestionType;
+    string? searchTerm = ViewBag.SearchTerm;
+
+    int totalCount = ViewBag.TotalCount ?? Model.Count();
+    int shortCount = ViewBag.ShortCount ?? Model.Count(q => q.QuestionType == "Short");
+    int longCount = ViewBag.LongCount ?? Model.Count(q => q.QuestionType == "Long");
+    int numericalCount = ViewBag.NumericalCount ?? Model.Count(q => q.QuestionType == "Numerical");
+}
+
+<!-- Page Header -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold text-dark mb-1">⭐ Important Questions Management</h2>
+        <p class="text-muted small mb-0">Organize and curate curriculum questions by Chapter, categorized into Short, Long, and Numerical problem types.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a asp-controller="Teacher" asp-action="AddQuestion" asp-route-chapterId="@selectedChapterId" asp-route-defaultType="@selectedQuestionType" class="btn btn-primary-custom d-flex align-items-center gap-2">
+            <i class="bi bi-plus-circle-fill"></i>
+            <span>Add Question</span>
+        </a>
+    </div>
+</div>
+
+<!-- Alert Notifications -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- Filters and Search Toolbar -->
+<div class="custom-card p-3 mb-4">
+    <form method="get" asp-controller="Teacher" asp-action="ImportantQuestions" class="row g-3 align-items-center">
+        <!-- Search Input -->
+        <div class="col-lg-4 col-md-5">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Search questions, hints, keywords..." value="@searchTerm" />
+                @if (!string.IsNullOrEmpty(searchTerm))
+                {
+                    <a asp-controller="Teacher" asp-action="ImportantQuestions" asp-route-chapterId="@selectedChapterId" asp-route-questionType="@selectedQuestionType" class="btn btn-outline-secondary" title="Clear search">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                }
+            </div>
+        </div>
+
+        <!-- Chapter Filter -->
+        <div class="col-lg-3 col-md-4">
+            <select name="chapterId" class="form-select" onchange="this.form.submit()">
+                <option value="">All Chapters (@chapters.Count)</option>
+                @foreach (var ch in chapters)
+                {
+                    <option value="@ch.Id" selected="@(selectedChapterId == ch.Id)">
+                        Chapter @ch.ChapterNumber: @ch.Name
+                    </option>
+                }
+            </select>
+        </div>
+
+        <!-- Question Type Filter -->
+        <div class="col-lg-3 col-md-3">
+            <select name="questionType" class="form-select" onchange="this.form.submit()">
+                <option value="All" selected="@(string.IsNullOrEmpty(selectedQuestionType) || selectedQuestionType == "All")">All Question Types</option>
+                <option value="Short" selected="@(selectedQuestionType == "Short")">📝 Short Questions</option>
+                <option value="Long" selected="@(selectedQuestionType == "Long")">📄 Long Questions</option>
+                <option value="Numerical" selected="@(selectedQuestionType == "Numerical")">🔢 Numerical Questions</option>
+            </select>
+        </div>
+
+        <!-- Action / Reset -->
+        <div class="col-lg-2 col-md-12 d-flex gap-2">
+            <button type="submit" class="btn btn-primary-custom w-100">
+                Filter
+            </button>
+            @if (selectedChapterId.HasValue || !string.IsNullOrEmpty(selectedQuestionType) || !string.IsNullOrEmpty(searchTerm))
+            {
+                <a asp-controller="Teacher" asp-action="ImportantQuestions" class="btn btn-outline-secondary" title="Reset all filters">
+                    <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+            }
+        </div>
+    </form>
+
+    <!-- Quick Question Type Filter Badges -->
+    <div class="d-flex flex-wrap gap-2 pt-3 mt-3 border-top align-items-center">
+        <span class="small text-muted fw-semibold me-2">Quick Filter:</span>
+        <a asp-controller="Teacher" asp-action="ImportantQuestions" asp-route-chapterId="@selectedChapterId" asp-route-search="@searchTerm"
+           class="badge rounded-pill text-decoration-none px-3 py-2 @(string.IsNullOrEmpty(selectedQuestionType) || selectedQuestionType == "All" ? "bg-dark text-white" : "bg-light text-dark border")">
+            All Types (@totalCount)
+        </a>
+        <a asp-controller="Teacher" asp-action="ImportantQuestions" asp-route-chapterId="@selectedChapterId" asp-route-questionType="Short" asp-route-search="@searchTerm"
+           class="badge rounded-pill text-decoration-none px-3 py-2 @(selectedQuestionType == "Short" ? "bg-primary text-white" : "bg-light text-dark border")">
+            📝 Short (@shortCount)
+        </a>
+        <a asp-controller="Teacher" asp-action="ImportantQuestions" asp-route-chapterId="@selectedChapterId" asp-route-questionType="Long" asp-route-search="@searchTerm"
+           class="badge rounded-pill text-decoration-none px-3 py-2 @(selectedQuestionType == "Long" ? "bg-secondary text-white" : "bg-light text-dark border")" style="@(selectedQuestionType == "Long" ? "background-color: #7c3aed !important;" : "")">
+            📄 Long (@longCount)
+        </a>
+        <a asp-controller="Teacher" asp-action="ImportantQuestions" asp-route-chapterId="@selectedChapterId" asp-route-questionType="Numerical" asp-route-search="@searchTerm"
+           class="badge rounded-pill text-decoration-none px-3 py-2 @(selectedQuestionType == "Numerical" ? "bg-success text-white" : "bg-light text-dark border")">
+            🔢 Numerical (@numericalCount)
+        </a>
+    </div>
+</div>
+
+<!-- Questions List / Grid -->
+@if (!Model.Any())
+{
+    <div class="custom-card p-5 text-center">
+        <div class="display-5 text-muted mb-3"><i class="bi bi-patch-question"></i></div>
+        <h5 class="fw-bold text-dark">No Important Questions Found</h5>
+        <p class="text-muted small mb-3">No questions match your current filter or search criteria. You can clear filters or add a new question.</p>
+        <div class="d-flex justify-content-center gap-2">
+            @if (selectedChapterId.HasValue || !string.IsNullOrEmpty(selectedQuestionType) || !string.IsNullOrEmpty(searchTerm))
+            {
+                <a asp-controller="Teacher" asp-action="ImportantQuestions" class="btn btn-outline-secondary btn-sm">Clear Filters</a>
+            }
+            <a asp-controller="Teacher" asp-action="AddQuestion" asp-route-chapterId="@selectedChapterId" asp-route-defaultType="@selectedQuestionType" class="btn btn-primary-custom btn-sm">
+                <i class="bi bi-plus-lg me-1"></i> Add Question
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var q in Model)
+        {
+            var typeBadgeClass = q.QuestionType switch
+            {
+                "Short" => "bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25",
+                "Long" => "bg-info bg-opacity-10 text-dark border border-info border-opacity-25",
+                "Numerical" => "bg-success bg-opacity-10 text-success border border-success border-opacity-25",
+                _ => "bg-secondary bg-opacity-10 text-secondary"
+            };
+
+            var typeIcon = q.QuestionType switch
+            {
+                "Short" => "bi-pencil-square",
+                "Long" => "bi-journal-text",
+                "Numerical" => "bi-calculator",
+                _ => "bi-question-circle"
+            };
+
+            <div class="col-lg-6">
+                <div class="custom-card h-100 p-4 d-flex flex-column justify-content-between shadow-sm">
+                    <div>
+                        <!-- Header / Badges -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge @typeBadgeClass px-3 py-1 rounded-pill fw-semibold">
+                                    <i class="bi @typeIcon me-1"></i>@q.QuestionType Question
+                                </span>
+                                <span class="badge bg-secondary bg-opacity-10 text-dark border">
+                                    @(q.Marks) Marks
+                                </span>
+                            </div>
+                            <span class="badge bg-dark bg-opacity-75 rounded-pill text-white px-3 py-1">
+                                Ch @(q.Chapter?.ChapterNumber)
+                            </span>
+                        </div>
+
+                        <!-- Question Text -->
+                        <h5 class="fw-bold text-dark mb-3" style="line-height: 1.5; font-size: 1.05rem;">
+                            @q.Question
+                        </h5>
+
+                        <!-- Meta Info (Chapter name, Exam Ref, Timestamps) -->
+                        <div class="d-flex flex-wrap align-items-center gap-3 mb-3 text-muted small">
+                            <span title="Chapter">
+                                <i class="bi bi-book me-1 text-primary"></i>@(q.Chapter?.Name ?? "General")
+                            </span>
+                            @if (!string.IsNullOrEmpty(q.ExamReference))
+                            {
+                                <span title="Exam Reference">
+                                    <i class="bi bi-award me-1 text-warning"></i>@q.ExamReference
+                                </span>
+                            }
+                            @if (!string.IsNullOrEmpty(q.DifficultyLevel))
+                            {
+                                <span class="badge @(q.DifficultyLevel == "Easy" ? "badge-soft-success" : (q.DifficultyLevel == "Medium" ? "badge-soft-warning" : "badge-soft-danger"))">
+                                    @q.DifficultyLevel
+                                </span>
+                            }
+                        </div>
+
+                        <!-- Answer Hint / Key Points (Collapsible) -->
+                        @if (!string.IsNullOrWhiteSpace(q.AnswerHint))
+                        {
+                            <div class="p-3 bg-light rounded-4 border-start border-4 border-warning small mb-3">
+                                <div class="fw-bold text-dark mb-1">
+                                    <i class="bi bi-lightbulb-fill text-warning me-1"></i> Solution Key &amp; Scoring Guidance:
+                                </div>
+                                <div class="text-secondary" style="line-height: 1.6;">
+                                    @q.AnswerHint
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Footer Action Controls -->
+                    <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-2">
+                        <div class="text-muted" style="font-size: 0.75rem;">
+                            <span>Added: @q.CreatedAt.ToString("MMM dd, yyyy")</span>
+                            @if (q.UpdatedAt.HasValue)
+                            {
+                                <span class="ms-2">&bull; Updated: @q.UpdatedAt.Value.ToString("MMM dd, yyyy")</span>
+                            }
+                        </div>
+                        <div class="btn-group btn-group-sm">
+                            <a asp-controller="Teacher" asp-action="EditQuestion" asp-route-id="@q.Id" class="btn btn-outline-primary" title="Edit Question">
+                                <i class="bi bi-pencil me-1"></i> Edit
+                            </a>
+                            <button type="button" class="btn btn-outline-danger" title="Delete Question"
+                                    data-bs-toggle="modal" data-bs-target="#deleteModal-@q.Id">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delete Confirmation Modal -->
+            <div class="modal fade" id="deleteModal-@q.Id" tabindex="-1" aria-labelledby="deleteModalLabel-@q.Id" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-danger text-white">
+                            <h6 class="modal-title fw-bold" id="deleteModalLabel-@q.Id">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i> Confirm Question Deletion
+                            </h6>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <p class="text-secondary mb-2">Are you sure you want to permanently delete this <strong>@q.QuestionType Question</strong> from <strong>Chapter @(q.Chapter?.ChapterNumber)</strong>?</p>
+                            <div class="p-3 bg-light rounded-3 border text-dark fw-semibold small">
+                                "@q.Question"
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light">
+                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                            <form asp-controller="Teacher" asp-action="DeleteQuestion" asp-route-id="@q.Id" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-trash me-1"></i> Delete Question
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

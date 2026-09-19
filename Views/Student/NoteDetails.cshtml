@@ -1,0 +1,83 @@
+@model EcoStudy.Models.Note
+@inject EcoStudy.Services.IFileService FileService
+
+@{
+    ViewData["Title"] = Model.Title;
+    Layout = "_DashboardLayout";
+}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a asp-controller="Student" asp-action="Dashboard" class="text-decoration-none">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Student" asp-action="Notes" class="text-decoration-none">Notes</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Note Details</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="custom-card p-4 p-md-5">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                @if (Model.Chapter != null)
+                {
+                    <span class="badge bg-secondary fs-6">Chapter @Model.Chapter.ChapterNumber: @Model.Chapter.Name</span>
+                }
+                <span class="badge @FileService.GetFileBadgeClass(Model.FileType) text-uppercase fs-6">
+                    @Model.FileType.TrimStart('.') Document
+                </span>
+            </div>
+
+            <h2 class="fw-bold text-dark mb-2">@Model.Title</h2>
+            <div class="text-muted small pb-3 border-bottom mb-4">
+                <span><i class="bi bi-person me-1"></i>Authored by @(Model.Teacher?.FullName ?? "Economics Faculty")</span>
+                <span class="ms-3"><i class="bi bi-calendar3 me-1"></i>Published: @Model.CreatedAt.ToString("MMMM dd, yyyy")</span>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-4">
+                <h6 class="fw-bold text-dark text-uppercase small tracking-wider mb-2">
+                    <i class="bi bi-journal-text text-primary me-1"></i> Document Summary &amp; Overview
+                </h6>
+                <div class="p-4 bg-light rounded-4 border text-secondary" style="line-height: 1.8;">
+                    @(string.IsNullOrWhiteSpace(Model.Description) ? "Comprehensive lecture notes and revision handout prepared for students." : Model.Description)
+                </div>
+            </div>
+
+            <!-- Download Hero Box -->
+            <div class="p-4 rounded-4 bg-white border shadow-sm mb-4">
+                <div class="row align-items-center gy-3">
+                    <div class="col-md-8 d-flex align-items-center gap-3">
+                        <div class="fs-1">
+                            <i class="bi @FileService.GetFileIcon(Model.FileType)"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark fs-6">@Model.FileName</div>
+                            <div class="text-muted small">
+                                Format: <strong>@Model.FileType.ToUpperInvariant().TrimStart('.')</strong> &bull; 
+                                File Size: <strong>@FileService.FormatFileSize(Model.FileSize)</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <a asp-controller="Student" asp-action="DownloadNote" asp-route-id="@Model.Id" class="btn btn-primary-custom btn-lg w-100 w-md-auto px-4">
+                            <i class="bi bi-download me-1"></i> Download File
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                <a asp-controller="Student" asp-action="Notes" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Study Notes
+                </a>
+                @if (Model.ChapterId > 0)
+                {
+                    <a asp-controller="Student" asp-action="ChapterDetails" asp-route-id="@Model.ChapterId" class="btn btn-outline-info">
+                        <i class="bi bi-journal-bookmark me-1"></i> View Chapter
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+</div>

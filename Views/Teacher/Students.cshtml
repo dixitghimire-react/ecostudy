@@ -1,0 +1,64 @@
+@model IEnumerable<EcoStudy.Models.ApplicationUser>
+
+@{
+    ViewData["Title"] = "Enrolled Students";
+    Layout = "_DashboardLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1">Enrolled Economics Students</h3>
+        <p class="text-muted small mb-0">Directory of registered students learning on the EcoStudy portal</p>
+    </div>
+    <span class="badge bg-success px-3 py-2 rounded-pill">Total: @Model.Count() Students</span>
+</div>
+
+<div class="custom-card">
+    <div class="custom-card-header">
+        <h6 class="custom-card-title">
+            <i class="bi bi-people-fill text-primary"></i> Registered Student Roster
+        </h6>
+    </div>
+    <div class="custom-card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light small">
+                    <tr>
+                        <th style="width: 60px;">#</th>
+                        <th>Student Name</th>
+                        <th>Email Address</th>
+                        <th>Class / Academic Level</th>
+                        <th>Account Status</th>
+                        <th>Joined Date</th>
+                    </tr>
+                </thead>
+                <tbody class="small">
+                    @{
+                        int index = 1;
+                    }
+                    @foreach (var student in Model)
+                    {
+                        <tr>
+                            <td class="text-muted">@(index++)</td>
+                            <td class="fw-semibold text-dark">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary fw-bold d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
+                                        @(student.FullName.Length > 0 ? student.FullName[0].ToString().ToUpper() : "S")
+                                    </div>
+                                    <div>
+                                        <div>@student.FullName</div>
+                                        <div class="text-muted small" style="font-size: 0.72rem;">ID: @student.Id.Substring(0, Math.Min(8, student.Id.Length))</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><i class="bi bi-envelope text-muted me-1"></i>@student.Email</td>
+                            <td><span class="badge badge-soft-primary">@(student.GradeOrLevel ?? "General Economics")</span></td>
+                            <td><span class="badge badge-soft-success"><i class="bi bi-check-circle me-1"></i>Active</span></td>
+                            <td class="text-muted">@student.CreatedAt.ToString("MMM dd, yyyy")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

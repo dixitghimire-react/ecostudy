@@ -1,0 +1,69 @@
+@model IEnumerable<EcoStudy.Models.Chapter>
+
+@{
+    ViewData["Title"] = "Economics Chapters";
+    Layout = "_DashboardLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1">Economics Curriculum</h3>
+        <p class="text-muted small mb-0">Browse curriculum chapters, explore syllabus topics, and open chapter details</p>
+    </div>
+    <span class="badge bg-primary px-3 py-2 rounded-pill">@Model.Count() Chapters</span>
+</div>
+
+<div class="row g-4">
+    @if (!Model.Any())
+    {
+        <div class="col-12">
+            <div class="p-5 text-center bg-white rounded-4 border">
+                <i class="bi bi-journal-x fs-1 text-muted"></i>
+                <h5 class="fw-bold mt-2">No Chapters Available</h5>
+                <p class="text-muted small">Your instructors have not published chapters yet. Please check back soon.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        @foreach (var ch in Model)
+        {
+            <div class="col-lg-6">
+                <div class="custom-card h-100 p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge bg-dark rounded-pill px-3 py-1">Chapter @ch.ChapterNumber</span>
+                            <span class="badge @(ch.SubjectArea == "Microeconomics" ? "badge-soft-primary" : "badge-soft-success")">
+                                @(string.IsNullOrEmpty(ch.SubjectArea) ? "Economics" : ch.SubjectArea)
+                            </span>
+                        </div>
+
+                        <h5 class="fw-bold text-dark mb-2">
+                            <a asp-controller="Student" asp-action="ChapterDetails" asp-route-id="@ch.Id" class="text-decoration-none text-dark hover-primary">
+                                @ch.Name
+                            </a>
+                        </h5>
+                        <p class="text-secondary small mb-3" style="line-height: 1.6;">
+                            @(string.IsNullOrWhiteSpace(ch.Description) ? "Comprehensive syllabus chapter covering fundamental economic principles." : ch.Description)
+                        </p>
+                    </div>
+
+                    <div class="border-top pt-3 mt-2">
+                        <div class="d-flex justify-content-between align-items-center mb-3 small text-muted">
+                            <span><i class="bi bi-calendar3 me-1"></i>Created: @ch.CreatedAt.ToString("MMM dd, yyyy")</span>
+                            @if (ch.UpdatedAt.HasValue)
+                            {
+                                <span class="badge badge-soft-warning"><i class="bi bi-pencil me-1"></i>Updated: @ch.UpdatedAt.Value.ToString("MMM dd, yyyy")</span>
+                            }
+                        </div>
+
+                        <a asp-controller="Student" asp-action="ChapterDetails" asp-route-id="@ch.Id" class="btn btn-primary-custom w-100 d-flex align-items-center justify-content-center gap-2">
+                            <span>Open Chapter</span>
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

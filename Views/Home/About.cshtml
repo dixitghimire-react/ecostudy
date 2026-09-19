@@ -1,0 +1,68 @@
+@{
+    ViewData["Title"] = "About EcoStudy";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="custom-card p-5">
+                <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-primary bg-opacity-10 text-primary fw-semibold small mb-3">
+                    <i class="bi bi-info-circle-fill"></i> Phase 1 Architecture Overview
+                </div>
+                <h2 class="fw-bold text-dark mb-3">About EcoStudy Economics Portal</h2>
+                <p class="text-secondary lead">
+                    EcoStudy is a dedicated web portal designed to streamline economics education for teachers and students alike.
+                </p>
+
+                <hr class="my-4" />
+
+                <h5 class="fw-bold text-dark mb-3">Implemented Technology Stack</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <strong class="d-block text-primary"><i class="bi bi-code-slash me-1"></i> Backend</strong>
+                            <span class="small text-muted">C# &bull; ASP.NET Core MVC &bull; .NET 8 LTS</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <strong class="d-block text-success"><i class="bi bi-database me-1"></i> Data &amp; ORM</strong>
+                            <span class="small text-muted">SQL Server &bull; Entity Framework Core 8</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <strong class="d-block text-warning"><i class="bi bi-shield-lock me-1"></i> Auth &amp; Roles</strong>
+                            <span class="small text-muted">ASP.NET Core Identity &bull; Teacher &amp; Student Roles</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 bg-light rounded-3 border">
+                            <strong class="d-block text-info"><i class="bi bi-brush me-1"></i> User Interface</strong>
+                            <span class="small text-muted">Bootstrap 5 &bull; Bootstrap Icons &bull; Responsive Sidebars</span>
+                        </div>
+                    </div>
+                </div>
+
+                <h5 class="fw-bold text-dark mb-2">Phase 1 Scope Completed</h5>
+                <ul class="text-secondary small mb-4">
+                    <li>ASP.NET Core Identity with role-based routing (Teacher &amp; Student)</li>
+                    <li>Student registration &amp; secure credential validation</li>
+                    <li>Teacher dashboard with sidebar (Dashboard, Chapters, Notes, Important Questions, Students, Logout)</li>
+                    <li>Student dashboard with sidebar (Dashboard, Chapters, Notes, Important Questions, Profile, Logout)</li>
+                    <li>EF Core Code-First models: <code>ApplicationUser</code>, <code>Chapter</code>, <code>Note</code>, <code>ImportantQuestion</code></li>
+                    <li>Automated database migration and seeding on startup</li>
+                </ul>
+
+                <div class="d-flex gap-2">
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary-custom">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Go to Login
+                    </a>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                        Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

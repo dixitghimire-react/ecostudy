@@ -1,0 +1,226 @@
+@model EcoStudy.Models.ViewModels.StudentDashboardViewModel
+
+@{
+    ViewData["Title"] = "Student Dashboard";
+    Layout = "_DashboardLayout";
+}
+
+<!-- Welcome Banner -->
+<div class="p-4 p-md-5 rounded-4 mb-4 text-white shadow-sm position-relative overflow-hidden" 
+     style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #0f172a 100%);">
+    <div class="row align-items-center position-relative" style="z-index: 2;">
+        <div class="col-lg-8">
+            <div class="badge bg-white bg-opacity-25 text-white px-3 py-1 rounded-pill mb-2 fw-semibold">
+                <i class="bi bi-mortarboard-fill me-1"></i> @(Model.StudentGrade ?? "Economics Student")
+            </div>
+            <h2 class="fw-bold mb-2">Hello, @Model.StudentName!</h2>
+            <p class="text-light text-opacity-80 mb-3 fs-6" style="max-width: 600px;">
+                Enhance your Economics mastery with syllabus-aligned lecture handouts, chapter overviews, and high-yield examination questions.
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-controller="Student" asp-action="Chapters" class="btn btn-light text-primary fw-bold btn-sm px-3 rounded-pill">
+                    <i class="bi bi-book-half me-1"></i> Explore Chapters
+                </a>
+                <a asp-controller="Student" asp-action="Notes" class="btn btn-outline-light btn-sm px-3 rounded-pill">
+                    <i class="bi bi-journal-text me-1"></i> Study Notes
+                </a>
+                <a asp-controller="Student" asp-action="ImportantQuestions" class="btn btn-outline-light btn-sm px-3 rounded-pill">
+                    <i class="bi bi-patch-question me-1"></i> Question Bank
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-4 text-lg-end mt-4 mt-lg-0 d-none d-lg-block">
+            <div class="display-1 text-white text-opacity-25"><i class="bi bi-lightbulb-fill"></i></div>
+        </div>
+    </div>
+</div>
+
+<!-- 3 Student Metrics -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <a asp-controller="Student" asp-action="Chapters" class="text-decoration-none">
+            <div class="stat-card h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="stat-icon-wrapper icon-purple">
+                        <i class="bi bi-journal-check"></i>
+                    </div>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill small">Curriculum</span>
+                </div>
+                <div class="stat-value">@Model.TotalAvailableChapters</div>
+                <div class="stat-label">Total Chapters</div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a asp-controller="Student" asp-action="Notes" class="text-decoration-none">
+            <div class="stat-card h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="stat-icon-wrapper icon-blue">
+                        <i class="bi bi-file-earmark-text-fill"></i>
+                    </div>
+                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill small">Handouts</span>
+                </div>
+                <div class="stat-value">@Model.TotalStudyNotes</div>
+                <div class="stat-label">Total Notes</div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a asp-controller="Student" asp-action="ImportantQuestions" class="text-decoration-none">
+            <div class="stat-card h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="stat-icon-wrapper icon-amber">
+                        <i class="bi bi-star-fill text-warning"></i>
+                    </div>
+                    <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 rounded-pill small">Practice</span>
+                </div>
+                <div class="stat-value">@Model.TotalPracticeQuestions</div>
+                <div class="stat-label">Total Important Questions</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Quick Chapters Access Grid -->
+<div class="custom-card mb-4">
+    <div class="custom-card-header">
+        <h6 class="custom-card-title">
+            <i class="bi bi-journals text-primary"></i> Economics Curriculum Chapters
+        </h6>
+        <a asp-controller="Student" asp-action="Chapters" class="btn btn-sm btn-link text-decoration-none">View All Chapters</a>
+    </div>
+    <div class="custom-card-body">
+        <div class="row g-3">
+            @foreach (var ch in Model.Chapters)
+            {
+                <div class="col-lg-4 col-md-6">
+                    <div class="p-3 rounded-4 border bg-light h-100 d-flex flex-column justify-content-between hover-card">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-dark rounded-pill">Chapter @ch.ChapterNumber</span>
+                                <span class="badge @(ch.SubjectArea == "Microeconomics" ? "badge-soft-primary" : "badge-soft-success")">
+                                    @ch.SubjectArea
+                                </span>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">@ch.Name</h6>
+                            <p class="text-secondary small mb-3" style="font-size: 0.82rem; line-height: 1.5;">@ch.Description</p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center border-top pt-2 small">
+                            <span class="text-muted">@ch.Notes.Count Notes &bull; @ch.ImportantQuestions.Count Qs</span>
+                            <a asp-controller="Student" asp-action="ChapterDetails" asp-route-id="@ch.Id" class="text-primary fw-semibold text-decoration-none">
+                                Study <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Recently Added Content (Notes & Questions) -->
+<div class="row g-4">
+    <!-- Recently Added Notes -->
+    <div class="col-lg-6">
+        <div class="custom-card h-100">
+            <div class="custom-card-header">
+                <h6 class="custom-card-title">
+                    <i class="bi bi-file-earmark-arrow-up-fill text-info"></i> Recently Added Notes
+                </h6>
+                <a asp-controller="Student" asp-action="Notes" class="btn btn-sm btn-link text-decoration-none">Browse All</a>
+            </div>
+            <div class="custom-card-body p-0">
+                @if (!Model.FeaturedNotes.Any())
+                {
+                    <div class="p-4 text-center text-muted small">No notes published yet.</div>
+                }
+                else
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var note in Model.FeaturedNotes)
+                        {
+                            <div class="list-group-item p-3 hover-bg">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <div class="d-flex align-items-center gap-1">
+                                        <span class="badge bg-secondary text-uppercase" style="font-size: 0.68rem;">@note.FileType.TrimStart('.')</span>
+                                        <span class="badge bg-light text-dark border small">Ch @(note.Chapter?.ChapterNumber): @(note.Chapter?.Name)</span>
+                                    </div>
+                                    <small class="text-muted">@note.CreatedAt.ToString("MMM dd")</small>
+                                </div>
+                                <h6 class="fw-bold text-dark mb-1">
+                                    <a asp-controller="Student" asp-action="NoteDetails" asp-route-id="@note.Id" class="text-decoration-none text-dark hover-primary">
+                                        @note.Title
+                                    </a>
+                                </h6>
+                                <p class="text-secondary small mb-2 text-truncate" style="max-width: 400px; font-size: 0.8rem;">
+                                    @note.Description
+                                </p>
+                                <div class="d-flex gap-2">
+                                    <a asp-controller="Student" asp-action="DownloadNote" asp-route-id="@note.Id" class="btn btn-primary-custom btn-sm py-0 px-2" style="font-size: 0.75rem;">
+                                        <i class="bi bi-download me-1"></i> Download
+                                    </a>
+                                    <a asp-controller="Student" asp-action="NoteDetails" asp-route-id="@note.Id" class="btn btn-outline-secondary btn-sm py-0 px-2" style="font-size: 0.75rem;">
+                                        Read Details
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Recently Added Questions -->
+    <div class="col-lg-6">
+        <div class="custom-card h-100">
+            <div class="custom-card-header">
+                <h6 class="custom-card-title">
+                    <i class="bi bi-patch-question-fill text-warning"></i> Recently Added Questions
+                </h6>
+                <a asp-controller="Student" asp-action="ImportantQuestions" class="btn btn-sm btn-link text-decoration-none">Question Bank</a>
+            </div>
+            <div class="custom-card-body p-0">
+                @if (!Model.HighYieldQuestions.Any())
+                {
+                    <div class="p-4 text-center text-muted small">No questions added yet.</div>
+                }
+                else
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var q in Model.HighYieldQuestions)
+                        {
+                            var typeBadge = q.QuestionType switch
+                            {
+                                "Short" => "bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25",
+                                "Long" => "bg-secondary text-white",
+                                "Numerical" => "bg-success bg-opacity-10 text-success border border-success border-opacity-25",
+                                _ => "bg-light text-dark border"
+                            };
+
+                            <div class="list-group-item p-3 hover-bg">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <div class="d-flex align-items-center gap-1">
+                                        <span class="badge @typeBadge small" style="@(q.QuestionType == "Long" ? "background-color: #7c3aed !important;" : "")">@q.QuestionType</span>
+                                        <span class="badge bg-light text-dark border small">@q.Marks Marks</span>
+                                        <span class="text-muted small">Ch @(q.Chapter?.ChapterNumber)</span>
+                                    </div>
+                                    <a asp-controller="Student" asp-action="ChapterDetails" asp-route-id="@q.ChapterId" class="btn btn-sm btn-link text-decoration-none py-0">Practice</a>
+                                </div>
+                                <h6 class="fw-semibold text-dark mb-1" style="font-size: 0.92rem; line-height: 1.5;">@q.Question</h6>
+                                @if (!string.IsNullOrWhiteSpace(q.AnswerHint))
+                                {
+                                    <div class="text-muted small text-truncate" style="font-size: 0.78rem;">
+                                        <i class="bi bi-lightbulb text-warning me-1"></i> @q.AnswerHint
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,375 @@
+@model EcoStudy.Models.Chapter
+@inject EcoStudy.Services.IFileService FileService
+
+@{
+    ViewData["Title"] = $"Chapter {Model.ChapterNumber}: {Model.Name}";
+    Layout = "_DashboardLayout";
+
+    var shortQuestions = Model.ImportantQuestions?.Where(q => q.QuestionType == "Short").OrderByDescending(q => q.Marks).ToList() ?? new List<EcoStudy.Models.ImportantQuestion>();
+    var longQuestions = Model.ImportantQuestions?.Where(q => q.QuestionType == "Long").OrderByDescending(q => q.Marks).ToList() ?? new List<EcoStudy.Models.ImportantQuestion>();
+    var numericalQuestions = Model.ImportantQuestions?.Where(q => q.QuestionType == "Numerical").OrderByDescending(q => q.Marks).ToList() ?? new List<EcoStudy.Models.ImportantQuestion>();
+    int totalQuestions = shortQuestions.Count + longQuestions.Count + numericalQuestions.Count;
+}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a asp-controller="Student" asp-action="Dashboard" class="text-decoration-none">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Student" asp-action="Chapters" class="text-decoration-none">Chapters</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Chapter Details</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Main Chapter Card -->
+        <div class="custom-card p-4 p-md-5 mb-4">
+            <!-- Chapter Header -->
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <span class="badge bg-dark rounded-pill px-3 py-1 fs-6">Chapter @Model.ChapterNumber</span>
+                <span class="badge @(Model.SubjectArea == "Microeconomics" ? "badge-soft-primary" : "badge-soft-success") fs-6">
+                    @(string.IsNullOrEmpty(Model.SubjectArea) ? "Economics" : Model.SubjectArea)
+                </span>
+            </div>
+
+            <h2 class="fw-bold text-dark mb-3">@Model.Name</h2>
+
+            <!-- Timestamp Metadata -->
+            <div class="d-flex flex-wrap gap-3 text-muted small pb-4 border-bottom mb-4">
+                <span>
+                    <i class="bi bi-calendar-check me-1 text-primary"></i>
+                    <strong>Published:</strong> @Model.CreatedAt.ToString("MMMM dd, yyyy")
+                </span>
+                @if (Model.UpdatedAt.HasValue)
+                {
+                    <span>
+                        <i class="bi bi-pencil-square me-1 text-warning"></i>
+                        <strong>Last Updated:</strong> @Model.UpdatedAt.Value.ToString("MMMM dd, yyyy 'at' hh:mm tt") UTC
+                    </span>
+                }
+            </div>
+
+            <!-- Chapter Syllabus & Description -->
+            <div class="mb-4">
+                <h5 class="fw-bold text-dark mb-3">
+                    <i class="bi bi-journal-text text-primary me-2"></i>Syllabus Overview &amp; Learning Objectives
+                </h5>
+                <div class="p-4 bg-light rounded-4 border text-secondary" style="line-height: 1.8; font-size: 1rem;">
+                    @if (string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        <span class="text-muted fst-italic">No detailed syllabus description provided yet.</span>
+                    }
+                    else
+                    {
+                        @Model.Description
+                    }
+                </div>
+            </div>
+
+            <!-- Chapter Content Summary Bar -->
+            <div class="row g-3 text-center">
+                <div class="col-sm-3 col-6">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="fs-4 fw-bold text-dark">@(Model.Notes?.Count ?? 0)</div>
+                        <div class="small text-muted">📖 Handouts &amp; Notes</div>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-6">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="fs-4 fw-bold text-primary">@shortQuestions.Count</div>
+                        <div class="small text-muted">📝 Short Questions</div>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-6">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="fs-4 fw-bold text-secondary" style="color: #7c3aed !important;">@longQuestions.Count</div>
+                        <div class="small text-muted">📄 Long Questions</div>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-6">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="fs-4 fw-bold text-success">@numericalQuestions.Count</div>
+                        <div class="small text-muted">🔢 Numerical Problems</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📖 Chapter Study Notes Section -->
+        <div class="custom-card mb-4">
+            <div class="custom-card-header">
+                <h6 class="custom-card-title">
+                    <i class="bi bi-file-earmark-text-fill text-primary"></i> 📖 Notes &amp; Handouts for Chapter @Model.ChapterNumber
+                </h6>
+                <span class="badge bg-secondary">@(Model.Notes?.Count ?? 0) documents</span>
+            </div>
+            <div class="custom-card-body p-0">
+                @if (Model.Notes == null || !Model.Notes.Any())
+                {
+                    <div class="p-5 text-center">
+                        <i class="bi bi-file-earmark-x fs-1 text-muted"></i>
+                        <h6 class="fw-bold mt-2">No Study Notes Yet for this Chapter</h6>
+                        <p class="text-muted small mb-0">Your instructor has not uploaded handouts for this chapter yet. Please check back later.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var note in Model.Notes.OrderByDescending(n => n.CreatedAt))
+                        {
+                            <div class="list-group-item p-4">
+                                <div class="row align-items-center gy-3">
+                                    <div class="col-md-8 d-flex align-items-start gap-3">
+                                        <div class="fs-1 mt-1">
+                                            <i class="bi @FileService.GetFileIcon(note.FileType)"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="fw-bold text-dark mb-1">
+                                                <a asp-controller="Student" asp-action="NoteDetails" asp-route-id="@note.Id" class="text-decoration-none text-dark hover-primary">
+                                                    @note.Title
+                                                </a>
+                                            </h6>
+                                            <p class="text-secondary small mb-2" style="line-height: 1.5;">
+                                                @(string.IsNullOrWhiteSpace(note.Description) ? "Comprehensive lecture notes and revision handout." : note.Description)
+                                            </p>
+                                            <div class="d-flex flex-wrap gap-2 align-items-center small text-muted">
+                                                <span class="badge @FileService.GetFileBadgeClass(note.FileType) text-uppercase">
+                                                    @note.FileType.TrimStart('.')
+                                                </span>
+                                                <span><i class="bi bi-paperclip me-1"></i>@note.FileName</span>
+                                                <span>&bull;</span>
+                                                <span><i class="bi bi-hdd me-1"></i>@FileService.FormatFileSize(note.FileSize)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-md-end d-flex gap-2 justify-content-md-end">
+                                        <a asp-controller="Student" asp-action="DownloadNote" asp-route-id="@note.Id" class="btn btn-primary-custom btn-sm px-3 d-flex align-items-center gap-1">
+                                            <i class="bi bi-download"></i>
+                                            <span>Download</span>
+                                        </a>
+                                        <a asp-controller="Student" asp-action="NoteDetails" asp-route-id="@note.Id" class="btn btn-outline-secondary btn-sm" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- ⭐ Important Questions Section (Separated by Type: Short, Long, Numerical) -->
+        <div class="custom-card mb-4">
+            <div class="custom-card-header flex-wrap gap-2">
+                <h6 class="custom-card-title">
+                    <i class="bi bi-star-fill text-warning me-1"></i> ⭐ Important Questions for Chapter @Model.ChapterNumber
+                    <span class="badge bg-secondary ms-2">@totalQuestions Questions</span>
+                </h6>
+                <a asp-controller="Student" asp-action="ImportantQuestions" asp-route-chapterId="@Model.Id" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> View in Question Bank
+                </a>
+            </div>
+            <div class="custom-card-body p-4">
+                <!-- Navigation Tabs / Category Pills -->
+                <ul class="nav nav-pills mb-4 gap-2" id="studentChapterQuestionsTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active rounded-pill px-4" id="std-short-tab" data-bs-toggle="pill" data-bs-target="#std-short" type="button" role="tab" aria-controls="std-short" aria-selected="true">
+                            📝 Short Questions (@shortQuestions.Count)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill px-4" id="std-long-tab" data-bs-toggle="pill" data-bs-target="#std-long" type="button" role="tab" aria-controls="std-long" aria-selected="false">
+                            📄 Long Questions (@longQuestions.Count)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill px-4" id="std-numerical-tab" data-bs-toggle="pill" data-bs-target="#std-numerical" type="button" role="tab" aria-controls="std-numerical" aria-selected="false">
+                            🔢 Numerical Questions (@numericalQuestions.Count)
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Panes with Reading-Friendly Cards -->
+                <div class="tab-content" id="studentChapterQuestionsTabContent">
+                    <!-- Tab 1: Short Questions -->
+                    <div class="tab-pane fade show active" id="std-short" role="tabpanel" aria-labelledby="std-short-tab">
+                        @if (!shortQuestions.Any())
+                        {
+                            <div class="p-4 text-center bg-light rounded-4 border">
+                                <i class="bi bi-patch-question fs-2 text-muted"></i>
+                                <h6 class="fw-bold mt-2">No Short Questions Available Yet</h6>
+                                <p class="text-muted small mb-0">Your instructor has not added short conceptual questions for this chapter yet.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row g-3">
+                                @foreach (var q in shortQuestions)
+                                {
+                                    <div class="col-12">
+                                        <div class="p-4 bg-light rounded-4 border">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1">
+                                                        @q.Marks Marks
+                                                    </span>
+                                                    <span class="badge bg-light text-secondary border">Short Question</span>
+                                                </div>
+                                                @if (!string.IsNullOrEmpty(q.ExamReference))
+                                                {
+                                                    <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 small">
+                                                        <i class="bi bi-award me-1"></i>@q.ExamReference
+                                                    </span>
+                                                }
+                                            </div>
+                                            <h6 class="fw-bold text-dark mb-2" style="line-height: 1.6; font-size: 1.02rem;">@q.Question</h6>
+
+                                            @if (!string.IsNullOrWhiteSpace(q.AnswerHint))
+                                            {
+                                                <div class="mt-2">
+                                                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1"
+                                                            type="button" data-bs-toggle="collapse" data-bs-target="#hint-ch-@q.Id" aria-expanded="false">
+                                                        <i class="bi bi-lightbulb text-warning"></i>
+                                                        <span>View Key Points</span>
+                                                    </button>
+                                                    <div class="collapse mt-2" id="hint-ch-@q.Id">
+                                                        <div class="p-3 bg-white rounded-3 border-start border-4 border-warning small text-secondary" style="line-height: 1.7;">
+                                                            <strong class="text-dark d-block mb-1">Key Conceptual Points:</strong>
+                                                            @q.AnswerHint
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Tab 2: Long Questions -->
+                    <div class="tab-pane fade" id="std-long" role="tabpanel" aria-labelledby="std-long-tab">
+                        @if (!longQuestions.Any())
+                        {
+                            <div class="p-4 text-center bg-light rounded-4 border">
+                                <i class="bi bi-journal-text fs-2 text-muted"></i>
+                                <h6 class="fw-bold mt-2">No Long Questions Available Yet</h6>
+                                <p class="text-muted small mb-0">Your instructor has not added long analytical questions for this chapter yet.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row g-3">
+                                @foreach (var q in longQuestions)
+                                {
+                                    <div class="col-12">
+                                        <div class="p-4 bg-light rounded-4 border">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="badge bg-secondary text-white px-2 py-1" style="background-color: #7c3aed !important;">
+                                                        @q.Marks Marks
+                                                    </span>
+                                                    <span class="badge bg-light text-secondary border">Long Essay Question</span>
+                                                </div>
+                                                @if (!string.IsNullOrEmpty(q.ExamReference))
+                                                {
+                                                    <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 small">
+                                                        <i class="bi bi-award me-1"></i>@q.ExamReference
+                                                    </span>
+                                                }
+                                            </div>
+                                            <h6 class="fw-bold text-dark mb-2" style="line-height: 1.6; font-size: 1.02rem;">@q.Question</h6>
+
+                                            @if (!string.IsNullOrWhiteSpace(q.AnswerHint))
+                                            {
+                                                <div class="mt-2">
+                                                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1"
+                                                            type="button" data-bs-toggle="collapse" data-bs-target="#hint-ch-@q.Id" aria-expanded="false">
+                                                        <i class="bi bi-lightbulb text-warning"></i>
+                                                        <span>View Scoring Guidelines</span>
+                                                    </button>
+                                                    <div class="collapse mt-2" id="hint-ch-@q.Id">
+                                                        <div class="p-3 bg-white rounded-3 border-start border-4 border-warning small text-secondary" style="line-height: 1.7;">
+                                                            <strong class="text-dark d-block mb-1">Scoring Outline &amp; Diagram Guidance:</strong>
+                                                            @q.AnswerHint
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Tab 3: Numerical Questions -->
+                    <div class="tab-pane fade" id="std-numerical" role="tabpanel" aria-labelledby="std-numerical-tab">
+                        @if (!numericalQuestions.Any())
+                        {
+                            <div class="p-4 text-center bg-light rounded-4 border">
+                                <i class="bi bi-calculator fs-2 text-muted"></i>
+                                <h6 class="fw-bold mt-2">No Numerical Questions Available Yet</h6>
+                                <p class="text-muted small mb-0">Your instructor has not added numerical problems for this chapter yet.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row g-3">
+                                @foreach (var q in numericalQuestions)
+                                {
+                                    <div class="col-12">
+                                        <div class="p-4 bg-light rounded-4 border">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
+                                                        @q.Marks Marks
+                                                    </span>
+                                                    <span class="badge bg-light text-secondary border">Numerical Problem</span>
+                                                </div>
+                                                @if (!string.IsNullOrEmpty(q.ExamReference))
+                                                {
+                                                    <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 small">
+                                                        <i class="bi bi-award me-1"></i>@q.ExamReference
+                                                    </span>
+                                                }
+                                            </div>
+                                            <h6 class="fw-bold text-dark mb-2" style="line-height: 1.6; font-size: 1.02rem;">@q.Question</h6>
+
+                                            @if (!string.IsNullOrWhiteSpace(q.AnswerHint))
+                                            {
+                                                <div class="mt-2">
+                                                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1"
+                                                            type="button" data-bs-toggle="collapse" data-bs-target="#hint-ch-@q.Id" aria-expanded="false">
+                                                        <i class="bi bi-calculator text-success"></i>
+                                                        <span>View Step-by-Step Solution</span>
+                                                    </button>
+                                                    <div class="collapse mt-2" id="hint-ch-@q.Id">
+                                                        <div class="p-3 bg-white rounded-3 border-start border-4 border-success small text-secondary" style="line-height: 1.7;">
+                                                            <strong class="text-success d-block mb-1">Step-by-Step Solution &amp; Working:</strong>
+                                                            @q.AnswerHint
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center pt-2">
+            <a asp-controller="Student" asp-action="Chapters" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Back to All Chapters
+            </a>
+            <a asp-controller="Student" asp-action="Dashboard" class="btn btn-outline-primary">
+                <i class="bi bi-speedometer2 me-1"></i> Go to Dashboard
+            </a>
+        </div>
+    </div>
+</div>

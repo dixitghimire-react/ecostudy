@@ -1,0 +1,109 @@
+@model EcoStudy.Models.ViewModels.NoteUploadViewModel
+
+@{
+    ViewData["Title"] = "Upload Note";
+    Layout = "_DashboardLayout";
+    var chapters = ViewBag.Chapters as List<EcoStudy.Models.Chapter> ?? new List<EcoStudy.Models.Chapter>();
+}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a asp-controller="Teacher" asp-action="Dashboard" class="text-decoration-none">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Teacher" asp-action="Notes" class="text-decoration-none">Notes</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Upload Document</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="custom-card p-4">
+            <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                <div class="stat-icon-wrapper icon-purple mb-0">
+                    <i class="bi bi-cloud-arrow-up"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold text-dark mb-0">Upload Study Note</h4>
+                    <p class="text-muted small mb-0">Share lecture handouts, revision summaries, and slides with students</p>
+                </div>
+            </div>
+
+            <form asp-controller="Teacher" asp-action="UploadNote" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                <div class="row g-3 mb-4">
+                    <!-- Chapter Selector -->
+                    <div class="col-12">
+                        <label asp-for="ChapterId" class="form-label fw-semibold small text-secondary">
+                            Belongs to Chapter <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-journal-bookmark text-muted"></i></span>
+                            <select asp-for="ChapterId" class="form-select bg-light border-start-0 ps-0" required>
+                                <option value="">Select Chapter...</option>
+                                @foreach (var ch in chapters)
+                                {
+                                    <option value="@ch.Id" selected="@(Model.ChapterId == ch.Id)">
+                                        Chapter @ch.ChapterNumber — @ch.Name (@ch.SubjectArea)
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <span asp-validation-for="ChapterId" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Note Title -->
+                    <div class="col-12">
+                        <label asp-for="Title" class="form-label fw-semibold small text-secondary">
+                            Note Title <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-file-earmark-text text-muted"></i></span>
+                            <input asp-for="Title" class="form-control bg-light border-start-0 ps-0" placeholder="e.g. Elasticity of Demand Handout & Numerical Schedule" required />
+                        </div>
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-12">
+                        <label asp-for="Description" class="form-label fw-semibold small text-secondary">
+                            Description / Key Concepts Covered
+                        </label>
+                        <textarea asp-for="Description" class="form-control bg-light" rows="3" 
+                                  placeholder="Provide context, formulas, and syllabus hints covered in this document..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <!-- File Upload Input -->
+                    <div class="col-12">
+                        <label asp-for="File" class="form-label fw-semibold small text-secondary">
+                            Document File <span class="text-danger">*</span>
+                        </label>
+                        <div class="p-4 border border-2 border-dashed rounded-3 bg-light text-center">
+                            <i class="bi bi-file-earmark-arrow-up fs-1 text-primary d-block mb-2"></i>
+                            <input asp-for="File" type="file" class="form-control mb-2" accept=".pdf,.doc,.docx,.ppt,.pptx" required />
+                            <div class="small text-muted">
+                                Allowed formats: <strong>PDF, DOC, DOCX, PPT, PPTX</strong> &bull; Maximum size: <strong>25 MB</strong>
+                            </div>
+                        </div>
+                        <span asp-validation-for="File" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <a asp-controller="Teacher" asp-action="Notes" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary-custom px-4">
+                        <i class="bi bi-cloud-upload-fill me-1"></i> Upload Note
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

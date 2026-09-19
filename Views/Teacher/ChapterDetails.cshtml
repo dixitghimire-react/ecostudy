@@ -1,0 +1,430 @@
+@model EcoStudy.Models.Chapter
+@inject EcoStudy.Services.IFileService FileService
+
+@{
+    ViewData["Title"] = $"Chapter {Model.ChapterNumber}: {Model.Name}";
+    Layout = "_DashboardLayout";
+
+    var shortQuestions = Model.ImportantQuestions?.Where(q => q.QuestionType == "Short").OrderByDescending(q => q.Marks).ToList() ?? new List<EcoStudy.Models.ImportantQuestion>();
+    var longQuestions = Model.ImportantQuestions?.Where(q => q.QuestionType == "Long").OrderByDescending(q => q.Marks).ToList() ?? new List<EcoStudy.Models.ImportantQuestion>();
+    var numericalQuestions = Model.ImportantQuestions?.Where(q => q.QuestionType == "Numerical").OrderByDescending(q => q.Marks).ToList() ?? new List<EcoStudy.Models.ImportantQuestion>();
+    int totalQuestions = shortQuestions.Count + longQuestions.Count + numericalQuestions.Count;
+}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a asp-controller="Teacher" asp-action="Dashboard" class="text-decoration-none">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Teacher" asp-action="Chapters" class="text-decoration-none">Chapters</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Chapter Details</li>
+    </ol>
+</nav>
+
+<!-- Alert Notifications -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Chapter Info Card -->
+        <div class="custom-card p-4 mb-4">
+            <!-- Header -->
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-start gap-3 pb-4 border-bottom mb-4">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-dark rounded-pill px-3 py-1 fs-6">Chapter @Model.ChapterNumber</span>
+                        <span class="badge @(Model.SubjectArea == "Microeconomics" ? "badge-soft-primary" : "badge-soft-success") fs-6">
+                            @(string.IsNullOrEmpty(Model.SubjectArea) ? "Economics" : Model.SubjectArea)
+                        </span>
+                    </div>
+                    <h2 class="fw-bold text-dark mb-1">@Model.Name</h2>
+                    <div class="text-muted small">
+                        <span><i class="bi bi-calendar-event me-1"></i>Created: @Model.CreatedAt.ToString("MMMM dd, yyyy 'at' hh:mm tt") UTC</span>
+                        @if (Model.UpdatedAt.HasValue)
+                        {
+                            <span class="ms-3"><i class="bi bi-pencil me-1"></i>Updated: @Model.UpdatedAt.Value.ToString("MMMM dd, yyyy 'at' hh:mm tt") UTC</span>
+                        }
+                    </div>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <a asp-controller="Teacher" asp-action="UploadNote" asp-route-chapterId="@Model.Id" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-cloud-arrow-up me-1"></i> Upload Note
+                    </a>
+                    <a asp-controller="Teacher" asp-action="AddQuestion" asp-route-chapterId="@Model.Id" class="btn btn-primary-custom btn-sm">
+                        <i class="bi bi-plus-circle me-1"></i> Add Question
+                    </a>
+                    <a asp-controller="Teacher" asp-action="EditChapter" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-pencil me-1"></i> Edit Chapter
+                    </a>
+                </div>
+            </div>
+
+            <!-- Description Section -->
+            <div class="mb-4">
+                <h6 class="fw-bold text-dark text-uppercase small tracking-wider mb-2">
+                    <i class="bi bi-card-text text-primary me-1"></i> Chapter Syllabus Description
+                </h6>
+                <div class="p-4 bg-light rounded-4 border text-secondary" style="line-height: 1.8; font-size: 0.95rem;">
+                    @if (string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        <span class="text-muted fst-italic">No detailed description has been provided for this chapter.</span>
+                    }
+                    else
+                    {
+                        @Model.Description
+                    }
+                </div>
+            </div>
+
+            <!-- Chapter Stats Summary Bar -->
+            <div class="row g-3 text-center">
+                <div class="col-sm-3 col-6">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="fs-4 fw-bold text-dark">@(Model.Notes?.Count ?? 0)</div>
+                        <div class="small text-muted">📖 Notes Uploaded</div>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-6">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="fs-4 fw-bold text-primary">@shortQuestions.Count</div>
+                        <div class="small text-muted">📝 Short Questions</div>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-6">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="fs-4 fw-bold text-secondary" style="color: #7c3aed !important;">@longQuestions.Count</div>
+                        <div class="small text-muted">📄 Long Questions</div>
+                    </div>
+                </div>
+                <div class="col-sm-3 col-6">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="fs-4 fw-bold text-success">@numericalQuestions.Count</div>
+                        <div class="small text-muted">🔢 Numerical Problems</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 📖 Chapter Study Notes Section -->
+        <div class="custom-card mb-4">
+            <div class="custom-card-header">
+                <h6 class="custom-card-title">
+                    <i class="bi bi-journal-bookmark-fill text-primary me-1"></i> 📖 Notes &amp; Handouts for Chapter @Model.ChapterNumber
+                </h6>
+                <a asp-controller="Teacher" asp-action="UploadNote" asp-route-chapterId="@Model.Id" class="btn btn-sm btn-primary-custom">
+                    <i class="bi bi-plus-lg me-1"></i> Upload Handout
+                </a>
+            </div>
+            <div class="custom-card-body p-0">
+                @if (Model.Notes == null || !Model.Notes.Any())
+                {
+                    <div class="p-4 text-center">
+                        <i class="bi bi-folder-x fs-1 text-muted"></i>
+                        <h6 class="fw-bold mt-2">No Notes Uploaded for this Chapter</h6>
+                        <p class="text-muted small mb-3">Upload lecture notes, revision guides, or presentations for Chapter @Model.ChapterNumber.</p>
+                        <a asp-controller="Teacher" asp-action="UploadNote" asp-route-chapterId="@Model.Id" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-cloud-upload me-1"></i> Upload Handout
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light small">
+                                <tr>
+                                    <th>Document Title</th>
+                                    <th>File Attachment</th>
+                                    <th>Size</th>
+                                    <th>Uploaded</th>
+                                    <th class="text-end" style="min-width: 160px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="small">
+                                @foreach (var note in Model.Notes.OrderByDescending(n => n.CreatedAt))
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <i class="bi @FileService.GetFileIcon(note.FileType) fs-4"></i>
+                                                <div>
+                                                    <a asp-controller="Teacher" asp-action="NoteDetails" asp-route-id="@note.Id" class="fw-bold text-dark text-decoration-none hover-primary">
+                                                        @note.Title
+                                                    </a>
+                                                    @if (!string.IsNullOrEmpty(note.Description))
+                                                    {
+                                                        <div class="text-muted text-truncate" style="max-width: 250px; font-size: 0.75rem;">
+                                                            @note.Description
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge @FileService.GetFileBadgeClass(note.FileType) text-uppercase">
+                                                @note.FileType.TrimStart('.')
+                                            </span>
+                                            <span class="text-secondary small ms-1 text-truncate d-inline-block align-middle" style="max-width: 140px;" title="@note.FileName">
+                                                @note.FileName
+                                            </span>
+                                        </td>
+                                        <td class="text-muted text-nowrap">@FileService.FormatFileSize(note.FileSize)</td>
+                                        <td class="text-muted text-nowrap">@note.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                        <td class="text-end">
+                                            <div class="btn-group btn-group-sm">
+                                                <a asp-controller="Teacher" asp-action="DownloadNote" asp-route-id="@note.Id" class="btn btn-outline-success" title="Download">
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                                <a asp-controller="Teacher" asp-action="EditNote" asp-route-id="@note.Id" class="btn btn-outline-primary" title="Edit">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <form asp-controller="Teacher" asp-action="DeleteNote" asp-route-id="@note.Id" asp-route-returnUrl="@Url.Action("ChapterDetails", "Teacher", new { id = Model.Id })" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete note: \'@note.Title\'?');">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-outline-danger" title="Delete">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- ⭐ Important Questions Section (Separated by Question Types) -->
+        <div class="custom-card mb-4">
+            <div class="custom-card-header flex-wrap gap-2">
+                <h6 class="custom-card-title">
+                    <i class="bi bi-star-fill text-warning me-1"></i> ⭐ Important Questions for Chapter @Model.ChapterNumber
+                    <span class="badge bg-secondary ms-2">@totalQuestions Total</span>
+                </h6>
+                <a asp-controller="Teacher" asp-action="AddQuestion" asp-route-chapterId="@Model.Id" class="btn btn-sm btn-primary-custom">
+                    <i class="bi bi-plus-lg me-1"></i> Add Question
+                </a>
+            </div>
+            <div class="custom-card-body p-4">
+                <!-- Question Type Nav Pills -->
+                <ul class="nav nav-pills mb-4 gap-2" id="chapterQuestionsTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active rounded-pill px-4" id="short-questions-tab" data-bs-toggle="pill" data-bs-target="#short-questions" type="button" role="tab" aria-controls="short-questions" aria-selected="true">
+                            📝 Short Questions (@shortQuestions.Count)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill px-4" id="long-questions-tab" data-bs-toggle="pill" data-bs-target="#long-questions" type="button" role="tab" aria-controls="long-questions" aria-selected="false">
+                            📄 Long Questions (@longQuestions.Count)
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill px-4" id="numerical-questions-tab" data-bs-toggle="pill" data-bs-target="#numerical-questions" type="button" role="tab" aria-controls="numerical-questions" aria-selected="false">
+                            🔢 Numerical Questions (@numericalQuestions.Count)
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Panes -->
+                <div class="tab-content" id="chapterQuestionsTabContent">
+                    <!-- Tab 1: Short Questions -->
+                    <div class="tab-pane fade show active" id="short-questions" role="tabpanel" aria-labelledby="short-questions-tab">
+                        @if (!shortQuestions.Any())
+                        {
+                            <div class="p-4 text-center bg-light rounded-4 border">
+                                <i class="bi bi-patch-question fs-2 text-muted"></i>
+                                <h6 class="fw-bold mt-2">No Short Questions Added</h6>
+                                <p class="text-muted small mb-3">Add concise 2-3 mark conceptual questions and definitions for Chapter @Model.ChapterNumber.</p>
+                                <a asp-controller="Teacher" asp-action="AddQuestion" asp-route-chapterId="@Model.Id" asp-route-defaultType="Short" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-plus-lg me-1"></i> Add Short Question
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row g-3">
+                                @foreach (var q in shortQuestions)
+                                {
+                                    <div class="col-12">
+                                        <div class="p-3 bg-light rounded-4 border d-flex flex-column gap-2">
+                                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1">
+                                                        @q.Marks Marks
+                                                    </span>
+                                                    @if (!string.IsNullOrEmpty(q.ExamReference))
+                                                    {
+                                                        <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25">
+                                                            @q.ExamReference
+                                                        </span>
+                                                    }
+                                                </div>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a asp-controller="Teacher" asp-action="EditQuestion" asp-route-id="@q.Id" class="btn btn-outline-primary btn-sm" title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <form asp-controller="Teacher" asp-action="DeleteQuestion" asp-route-id="@q.Id" asp-route-returnUrl="@Url.Action("ChapterDetails", "Teacher", new { id = Model.Id })" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this question?');">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <h6 class="fw-bold text-dark mb-1" style="line-height: 1.5;">@q.Question</h6>
+                                            @if (!string.IsNullOrWhiteSpace(q.AnswerHint))
+                                            {
+                                                <div class="p-2 px-3 bg-white rounded-3 border-start border-3 border-warning small text-secondary">
+                                                    <strong class="text-dark">Key Point:</strong> @q.AnswerHint
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Tab 2: Long Questions -->
+                    <div class="tab-pane fade" id="long-questions" role="tabpanel" aria-labelledby="long-questions-tab">
+                        @if (!longQuestions.Any())
+                        {
+                            <div class="p-4 text-center bg-light rounded-4 border">
+                                <i class="bi bi-journal-text fs-2 text-muted"></i>
+                                <h6 class="fw-bold mt-2">No Long Questions Added</h6>
+                                <p class="text-muted small mb-3">Add detailed 5-6 mark essay, analytical, or diagram questions for Chapter @Model.ChapterNumber.</p>
+                                <a asp-controller="Teacher" asp-action="AddQuestion" asp-route-chapterId="@Model.Id" asp-route-defaultType="Long" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-plus-lg me-1"></i> Add Long Question
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row g-3">
+                                @foreach (var q in longQuestions)
+                                {
+                                    <div class="col-12">
+                                        <div class="p-3 bg-light rounded-4 border d-flex flex-column gap-2">
+                                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="badge bg-secondary text-white px-2 py-1" style="background-color: #7c3aed !important;">
+                                                        @q.Marks Marks
+                                                    </span>
+                                                    @if (!string.IsNullOrEmpty(q.ExamReference))
+                                                    {
+                                                        <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25">
+                                                            @q.ExamReference
+                                                        </span>
+                                                    }
+                                                </div>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a asp-controller="Teacher" asp-action="EditQuestion" asp-route-id="@q.Id" class="btn btn-outline-primary btn-sm" title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <form asp-controller="Teacher" asp-action="DeleteQuestion" asp-route-id="@q.Id" asp-route-returnUrl="@Url.Action("ChapterDetails", "Teacher", new { id = Model.Id })" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this question?');">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <h6 class="fw-bold text-dark mb-1" style="line-height: 1.5;">@q.Question</h6>
+                                            @if (!string.IsNullOrWhiteSpace(q.AnswerHint))
+                                            {
+                                                <div class="p-2 px-3 bg-white rounded-3 border-start border-3 border-warning small text-secondary">
+                                                    <strong class="text-dark">Scoring Guidelines:</strong> @q.AnswerHint
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Tab 3: Numerical Questions -->
+                    <div class="tab-pane fade" id="numerical-questions" role="tabpanel" aria-labelledby="numerical-questions-tab">
+                        @if (!numericalQuestions.Any())
+                        {
+                            <div class="p-4 text-center bg-light rounded-4 border">
+                                <i class="bi bi-calculator fs-2 text-muted"></i>
+                                <h6 class="fw-bold mt-2">No Numerical Questions Added</h6>
+                                <p class="text-muted small mb-3">Add calculation problems, schedules, formulas, and data analysis for Chapter @Model.ChapterNumber.</p>
+                                <a asp-controller="Teacher" asp-action="AddQuestion" asp-route-chapterId="@Model.Id" asp-route-defaultType="Numerical" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-plus-lg me-1"></i> Add Numerical Question
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row g-3">
+                                @foreach (var q in numericalQuestions)
+                                {
+                                    <div class="col-12">
+                                        <div class="p-3 bg-light rounded-4 border d-flex flex-column gap-2">
+                                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1">
+                                                        @q.Marks Marks
+                                                    </span>
+                                                    @if (!string.IsNullOrEmpty(q.ExamReference))
+                                                    {
+                                                        <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25">
+                                                            @q.ExamReference
+                                                        </span>
+                                                    }
+                                                </div>
+                                                <div class="btn-group btn-group-sm">
+                                                    <a asp-controller="Teacher" asp-action="EditQuestion" asp-route-id="@q.Id" class="btn btn-outline-primary btn-sm" title="Edit">
+                                                        <i class="bi bi-pencil"></i>
+                                                    </a>
+                                                    <form asp-controller="Teacher" asp-action="DeleteQuestion" asp-route-id="@q.Id" asp-route-returnUrl="@Url.Action("ChapterDetails", "Teacher", new { id = Model.Id })" method="post" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this question?');">
+                                                        @Html.AntiForgeryToken()
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <h6 class="fw-bold text-dark mb-1" style="line-height: 1.5;">@q.Question</h6>
+                                            @if (!string.IsNullOrWhiteSpace(q.AnswerHint))
+                                            {
+                                                <div class="p-2 px-3 bg-white rounded-3 border-start border-3 border-success small text-secondary">
+                                                    <strong class="text-success">Step-by-step Solution Key:</strong> @q.AnswerHint
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back Navigation Footer -->
+        <div class="d-flex justify-content-between align-items-center pt-2">
+            <a asp-controller="Teacher" asp-action="Chapters" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Back to All Chapters
+            </a>
+            <a asp-controller="Teacher" asp-action="ImportantQuestions" asp-route-chapterId="@Model.Id" class="btn btn-outline-primary">
+                <i class="bi bi-star me-1"></i> Manage Chapter Questions
+            </a>
+        </div>
+    </div>
+</div>

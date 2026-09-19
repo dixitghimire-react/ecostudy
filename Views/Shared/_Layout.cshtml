@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - EcoStudy | Economics Study Portal</title>
+    <!-- Theme Initializer: Runs before render to prevent flash of wrong theme -->
+    <script>
+        (function() {
+            var savedTheme = localStorage.getItem('ecostudy_theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark-theme');
+            }
+        })();
+    </script>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Custom Design System -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <!-- Main Public Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3 sticky-top border-bottom border-secondary border-opacity-25" style="background-color: #0f172a !important;">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-4" asp-controller="Home" asp-action="Index">
+                <div class="rounded-3 bg-primary text-white d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <span>Eco<span class="text-info">Study</span></span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                    <li class="nav-item">
+                        <a class="nav-link text-light-emphasis fw-medium" asp-controller="Home" asp-action="Index">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light-emphasis fw-medium" asp-controller="Home" asp-action="About">About Portal</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light-emphasis fw-medium" asp-controller="Home" asp-action="Search">
+                            <i class="bi bi-search me-1"></i> Search Curriculum
+                        </a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav align-items-lg-center gap-2">
+                    <!-- Dark / Light Theme Toggle -->
+                    <li class="nav-item me-2">
+                        <button type="button" class="theme-toggle-btn border-secondary" id="publicThemeToggleBtn" title="Toggle Light / Dark Mode" aria-label="Toggle theme">
+                            <i class="bi bi-moon-stars-fill text-light" id="publicThemeIcon"></i>
+                        </button>
+                    </li>
+
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            @if (User.IsInRole("Teacher"))
+                            {
+                                <a class="btn btn-outline-info rounded-pill px-3 py-1 btn-sm" asp-controller="Teacher" asp-action="Dashboard">
+                                    <i class="bi bi-speedometer2 me-1"></i> Teacher Dashboard
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="btn btn-outline-info rounded-pill px-3 py-1 btn-sm" asp-controller="Student" asp-action="Dashboard">
+                                    <i class="bi bi-mortarboard me-1"></i> Student Dashboard
+                                </a>
+                            }
+                        </li>
+                        <li class="nav-item">
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-link text-danger text-decoration-none px-2 py-1">
+                                    <i class="bi bi-box-arrow-right me-1"></i> Logout
+                                </button>
+                            </form>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-white fw-semibold px-3" asp-controller="Account" asp-action="Login">
+                                <i class="bi bi-box-arrow-in-right me-1"></i> Log In
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-primary-custom rounded-pill px-4 py-2 text-white text-decoration-none" asp-controller="Account" asp-action="Register">
+                                <i class="bi bi-person-plus me-1"></i> Student Register
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main View Content -->
+    <main role="main" class="flex-grow-1">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5 border-top border-secondary border-opacity-25 mt-auto" style="background-color: #0b1120 !important;">
+        <div class="container">
+            <div class="row gy-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="rounded bg-primary text-white p-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                            <i class="bi bi-graph-up-arrow"></i>
+                        </div>
+                        <h5 class="mb-0 fw-bold">Eco<span class="text-info">Study</span></h5>
+                    </div>
+                    <p class="text-secondary small pe-lg-4">
+                        A modern, comprehensive academic study portal dedicated to Economics learners and educators. Master Microeconomics, Macroeconomics, and exam preparation with ease.
+                    </p>
+                </div>
+                <div class="col-lg-2 col-md-6 col-6">
+                    <h6 class="text-uppercase fw-bold text-light mb-3 small tracking-wider">Navigation</h6>
+                    <ul class="list-unstyled text-secondary small mb-0 d-flex flex-column gap-2">
+                        <li><a asp-controller="Home" asp-action="Index" class="text-decoration-none text-secondary hover-white">Home</a></li>
+                        <li><a asp-controller="Home" asp-action="About" class="text-decoration-none text-secondary hover-white">About EcoStudy</a></li>
+                        <li><a asp-controller="Account" asp-action="Login" class="text-decoration-none text-secondary hover-white">Portal Sign In</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6 col-6">
+                    <h6 class="text-uppercase fw-bold text-light mb-3 small tracking-wider">Curriculum</h6>
+                    <ul class="list-unstyled text-secondary small mb-0 d-flex flex-column gap-2">
+                        <li>Microeconomics Core</li>
+                        <li>Theory of Consumer Behaviour</li>
+                        <li>Macroeconomic Aggregates</li>
+                        <li>Money & Banking Reserves</li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="text-uppercase fw-bold text-light mb-3 small tracking-wider">Phase 1 Access</h6>
+                    <div class="p-3 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
+                        <span class="badge bg-primary mb-2">Teacher & Student Portals</span>
+                        <p class="text-light-emphasis small mb-0">Role-based security, Chapter blueprints, Study Notes, & Question Banks active.</p>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4 border-secondary border-opacity-25" />
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center small text-secondary">
+                <div>&copy; @DateTime.UtcNow.Year EcoStudy Portal. Built with ASP.NET Core MVC & .NET 8 LTS.</div>
+                <div class="d-flex gap-3 mt-2 mt-sm-0">
+                    <span class="text-success"><i class="bi bi-shield-check me-1"></i> Identity Secured</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        function updatePublicThemeIcon(theme) {
+            var icon = document.getElementById('publicThemeIcon');
+            if (!icon) return;
+            if (theme === 'dark') {
+                icon.className = 'bi bi-sun-fill text-warning';
+            } else {
+                icon.className = 'bi bi-moon-stars-fill text-light';
+            }
+        }
+        var curTheme = localStorage.getItem('ecostudy_theme') || 'light';
+        updatePublicThemeIcon(curTheme);
+
+        document.getElementById('publicThemeToggleBtn')?.addEventListener('click', function() {
+            var activeTheme = document.documentElement.getAttribute('data-bs-theme') || 'light';
+            var nextTheme = activeTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-bs-theme', nextTheme);
+            if (nextTheme === 'dark') {
+                document.documentElement.classList.add('dark-theme');
+            } else {
+                document.documentElement.classList.remove('dark-theme');
+            }
+            localStorage.setItem('ecostudy_theme', nextTheme);
+            updatePublicThemeIcon(nextTheme);
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

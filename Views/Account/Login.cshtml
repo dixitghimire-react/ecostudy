@@ -1,0 +1,82 @@
+@model EcoStudy.Models.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Portal Login";
+}
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo-badge">
+                <i class="bi bi-shield-lock-fill"></i>
+            </div>
+            <h3 class="fw-bold text-dark mb-1">EcoStudy Sign In</h3>
+            <p class="text-muted small">Access your personalized Economics study or teaching dashboard</p>
+        </div>
+
+        <!-- Quick Demo Credentials Helpers -->
+        <div class="mb-4 p-3 bg-light rounded-3 border">
+            <div class="small fw-bold text-secondary mb-2"><i class="bi bi-key-fill text-warning me-1"></i> Quick Demo Accounts:</div>
+            <div class="d-flex flex-column gap-1 small">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span><strong class="text-primary">Teacher:</strong> teacher@ecostudy.com</span>
+                    <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 text-nowrap" onclick="fillCredentials('teacher@ecostudy.com', 'Teacher@123')">Use</button>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span><strong class="text-info">Student:</strong> student@ecostudy.com</span>
+                    <button type="button" class="btn btn-sm btn-outline-info py-0 px-2 text-nowrap" onclick="fillCredentials('student@ecostudy.com', 'Student@123')">Use</button>
+                </div>
+                <div class="text-muted" style="font-size: 0.75rem;">Password for demo accounts: <code>Teacher@123</code> / <code>Student@123</code></div>
+            </div>
+        </div>
+
+        <form asp-controller="Account" asp-action="Login" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label fw-semibold small text-secondary"></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-muted"></i></span>
+                    <input asp-for="Email" id="loginEmail" type="email" class="form-control bg-light border-start-0 ps-0" placeholder="youremail@example.com" />
+                </div>
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label fw-semibold small text-secondary"></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                    <input asp-for="Password" id="loginPassword" type="password" class="form-control bg-light border-start-0 ps-0" placeholder="Your password" />
+                </div>
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="form-check">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label small text-secondary"></label>
+                </div>
+            </div>
+
+            <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-primary-custom py-2 fw-semibold">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to Portal
+                </button>
+            </div>
+
+            <div class="text-center small text-muted">
+                New student? <a asp-controller="Account" asp-action="Register" class="text-primary fw-semibold text-decoration-none">Register here</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function fillCredentials(email, pwd) {
+            document.getElementById('loginEmail').value = email;
+            document.getElementById('loginPassword').value = pwd;
+        }
+    </script>
+}

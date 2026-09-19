@@ -1,0 +1,133 @@
+@model EcoStudy.Models.ViewModels.NoteEditViewModel
+@inject EcoStudy.Services.IFileService FileService
+
+@{
+    ViewData["Title"] = "Edit Note";
+    Layout = "_DashboardLayout";
+    var chapters = ViewBag.Chapters as List<EcoStudy.Models.Chapter> ?? new List<EcoStudy.Models.Chapter>();
+}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a asp-controller="Teacher" asp-action="Dashboard" class="text-decoration-none">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Teacher" asp-action="Notes" class="text-decoration-none">Notes</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Edit Note</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="custom-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="stat-icon-wrapper icon-blue mb-0">
+                        <i class="bi bi-pencil-square"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold text-dark mb-0">Edit Study Note</h4>
+                        <p class="text-muted small mb-0">Update document details or replace the attached study material</p>
+                    </div>
+                </div>
+                <span class="badge bg-secondary">ID #@Model.Id</span>
+            </div>
+
+            <form asp-controller="Teacher" asp-action="EditNote" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="ExistingFileName" />
+                <input type="hidden" asp-for="ExistingFileType" />
+                <input type="hidden" asp-for="ExistingFileSize" />
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                <div class="row g-3 mb-4">
+                    <!-- Chapter Selector -->
+                    <div class="col-12">
+                        <label asp-for="ChapterId" class="form-label fw-semibold small text-secondary">
+                            Belongs to Chapter <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-journal-bookmark text-muted"></i></span>
+                            <select asp-for="ChapterId" class="form-select bg-light border-start-0 ps-0" required>
+                                @foreach (var ch in chapters)
+                                {
+                                    <option value="@ch.Id" selected="@(Model.ChapterId == ch.Id)">
+                                        Chapter @ch.ChapterNumber — @ch.Name (@ch.SubjectArea)
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                        <span asp-validation-for="ChapterId" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Note Title -->
+                    <div class="col-12">
+                        <label asp-for="Title" class="form-label fw-semibold small text-secondary">
+                            Note Title <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-file-earmark-text text-muted"></i></span>
+                            <input asp-for="Title" class="form-control bg-light border-start-0 ps-0" required />
+                        </div>
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="col-12">
+                        <label asp-for="Description" class="form-label fw-semibold small text-secondary">
+                            Description / Overview
+                        </label>
+                        <textarea asp-for="Description" class="form-control bg-light" rows="3"></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Current File Display -->
+                    <div class="col-12">
+                        <label class="form-label fw-semibold small text-secondary">Currently Attached Document</label>
+                        <div class="p-3 bg-light rounded-3 border d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <i class="bi @FileService.GetFileIcon(Model.ExistingFileType) fs-3"></i>
+                                <div>
+                                    <div class="fw-bold text-dark">@Model.ExistingFileName</div>
+                                    <div class="text-muted small">
+                                        Format: <span class="badge @FileService.GetFileBadgeClass(Model.ExistingFileType) text-uppercase">@Model.ExistingFileType.TrimStart('.')</span> &bull; 
+                                        Size: @FileService.FormatFileSize(Model.ExistingFileSize)
+                                    </div>
+                                </div>
+                            </div>
+                            <a asp-controller="Teacher" asp-action="DownloadNote" asp-route-id="@Model.Id" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-download me-1"></i> Download
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Replace File Option -->
+                    <div class="col-12">
+                        <label asp-for="NewFile" class="form-label fw-semibold small text-secondary">
+                            Replace Document File (Leave empty to keep existing file)
+                        </label>
+                        <input asp-for="NewFile" type="file" class="form-control" accept=".pdf,.doc,.docx,.ppt,.pptx" />
+                        <div class="form-text small">
+                            Accepted formats: PDF, DOC, DOCX, PPT, PPTX (Up to 25 MB). If uploaded, the previous file will be safely deleted.
+                        </div>
+                        <span asp-validation-for="NewFile" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <a asp-controller="Teacher" asp-action="Notes" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary-custom px-4">
+                        <i class="bi bi-save me-1"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

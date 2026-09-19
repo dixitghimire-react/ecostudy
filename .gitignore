@@ -1,0 +1,25 @@
+## .NET Core
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+*.user
+*.userosscache
+*.sln.docstates
+
+## Visual Studio & VS Code
+.vs/
+.vscode/
+*.suo
+*.userprefs
+
+## Database
+*.db
+*.sqlite
+
+## OS
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store

@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "Access Denied";
+}
+
+<div class="auth-wrapper">
+    <div class="auth-card text-center">
+        <div class="mb-3">
+            <div class="rounded-circle bg-danger bg-opacity-10 text-danger d-inline-flex align-items-center justify-content-center" style="width: 72px; height: 72px;">
+                <i class="bi bi-shield-slash fs-1"></i>
+            </div>
+        </div>
+        <h3 class="fw-bold text-dark mb-2">Access Denied</h3>
+        <p class="text-muted small mb-4">
+            You do not have the required permissions or role to view this restricted page. EcoStudy protects teacher and student portals separately.
+        </p>
+
+        <div class="d-flex flex-column gap-2">
+            @if (User.IsInRole("Teacher"))
+            {
+                <a asp-controller="Teacher" asp-action="Dashboard" class="btn btn-primary-custom">
+                    <i class="bi bi-arrow-left me-1"></i> Return to Teacher Dashboard
+                </a>
+            }
+            else if (User.IsInRole("Student"))
+            {
+                <a asp-controller="Student" asp-action="Dashboard" class="btn btn-primary-custom">
+                    <i class="bi bi-arrow-left me-1"></i> Return to Student Dashboard
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Account" asp-action="Login" class="btn btn-primary-custom">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Sign In With Authorized Account
+                </a>
+            }
+            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                Back to Public Home
+            </a>
+        </div>
+    </div>
+</div>

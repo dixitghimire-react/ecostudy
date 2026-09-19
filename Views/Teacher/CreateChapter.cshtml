@@ -1,0 +1,103 @@
+@model EcoStudy.Models.Chapter
+
+@{
+    ViewData["Title"] = "Create Chapter";
+    Layout = "_DashboardLayout";
+}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a asp-controller="Teacher" asp-action="Dashboard" class="text-decoration-none">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Teacher" asp-action="Chapters" class="text-decoration-none">Chapters</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Create New Chapter</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="custom-card p-4">
+            <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                <div class="stat-icon-wrapper icon-purple mb-0">
+                    <i class="bi bi-journal-plus"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold text-dark mb-0">Create New Chapter</h4>
+                    <p class="text-muted small mb-0">Add a new curriculum unit for your Economics students</p>
+                </div>
+            </div>
+
+            <form asp-controller="Teacher" asp-action="CreateChapter" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label asp-for="ChapterNumber" class="form-label fw-semibold small text-secondary">
+                            Chapter Number <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-hash text-muted"></i></span>
+                            <input asp-for="ChapterNumber" type="number" min="1" max="999" class="form-control bg-light border-start-0 ps-0" placeholder="e.g. 1" />
+                        </div>
+                        <span asp-validation-for="ChapterNumber" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-8">
+                        <label asp-for="Name" class="form-label fw-semibold small text-secondary">
+                            Chapter Name <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-type text-muted"></i></span>
+                            <input asp-for="Name" class="form-control bg-light border-start-0 ps-0" placeholder="e.g. Introduction to Economics" />
+                        </div>
+                        <span asp-validation-for="Name" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="SubjectArea" class="form-label fw-semibold small text-secondary">
+                            Subject Area / Category
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-tag text-muted"></i></span>
+                            <select asp-for="SubjectArea" class="form-select bg-light border-start-0 ps-0">
+                                <option value="Microeconomics">Microeconomics</option>
+                                <option value="Macroeconomics">Macroeconomics</option>
+                                <option value="Development Economics">Development Economics</option>
+                                <option value="Quantitative Economics">Quantitative Economics</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="SubjectArea" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label asp-for="Description" class="form-label fw-semibold small text-secondary">
+                            Chapter Description / Syllabus Scope
+                        </label>
+                        <textarea asp-for="Description" class="form-control bg-light" rows="4" 
+                                  placeholder="Provide an overview of key economic concepts, models, and definitions covered in this chapter..."></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-light rounded-3 small text-muted mb-4 border">
+                    <i class="bi bi-info-circle text-primary me-1"></i>
+                    Once created, the chapter will be instantly visible to enrolled students. You can edit or remove it at any time.
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <a asp-controller="Teacher" asp-action="Chapters" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary-custom px-4">
+                        <i class="bi bi-check2-circle me-1"></i> Create Chapter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

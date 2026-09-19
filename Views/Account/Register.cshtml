@@ -1,0 +1,86 @@
+@model EcoStudy.Models.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Student Registration";
+}
+
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo-badge">
+                <i class="bi bi-mortarboard-fill"></i>
+            </div>
+            <h3 class="fw-bold text-dark mb-1">Create Student Account</h3>
+            <p class="text-muted small">Join EcoStudy to access chapters, notes, and exam questions</p>
+        </div>
+
+        <form asp-controller="Account" asp-action="Register" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label fw-semibold small text-secondary"></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+                    <input asp-for="FullName" class="form-control bg-light border-start-0 ps-0" placeholder="e.g. Alex Morgan" />
+                </div>
+                <span asp-validation-for="FullName" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label fw-semibold small text-secondary"></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-envelope text-muted"></i></span>
+                    <input asp-for="Email" type="email" class="form-control bg-light border-start-0 ps-0" placeholder="student@example.com" />
+                </div>
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="GradeOrLevel" class="form-label fw-semibold small text-secondary"></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-book text-muted"></i></span>
+                    <select asp-for="GradeOrLevel" class="form-select bg-light border-start-0 ps-0">
+                        <option value="">Select Class / Level...</option>
+                        <option value="Grade 11 Economics">Grade 11 Economics</option>
+                        <option value="Grade 12 Economics">Grade 12 Economics</option>
+                        <option value="Undergraduate Economics">Undergraduate Economics</option>
+                        <option value="Competitive Exam Prep">Competitive Exam Prep</option>
+                    </select>
+                </div>
+                <span asp-validation-for="GradeOrLevel" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label fw-semibold small text-secondary"></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+                    <input asp-for="Password" type="password" class="form-control bg-light border-start-0 ps-0" placeholder="Minimum 6 characters" />
+                </div>
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="ConfirmPassword" class="form-label fw-semibold small text-secondary"></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-shield-lock text-muted"></i></span>
+                    <input asp-for="ConfirmPassword" type="password" class="form-control bg-light border-start-0 ps-0" placeholder="Re-enter password" />
+                </div>
+                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+            </div>
+
+            <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-primary-custom py-2 fw-semibold">
+                    <i class="bi bi-check2-circle me-1"></i> Complete Registration
+                </button>
+            </div>
+
+            <div class="text-center small text-muted">
+                Already registered? <a asp-controller="Account" asp-action="Login" class="text-primary fw-semibold text-decoration-none">Sign In here</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

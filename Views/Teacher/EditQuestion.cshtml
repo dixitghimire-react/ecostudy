@@ -1,0 +1,146 @@
+@model EcoStudy.Models.ImportantQuestion
+
+@{
+    ViewData["Title"] = $"Edit Question #{Model.Id}";
+    Layout = "_DashboardLayout";
+    var chapters = ViewBag.Chapters as List<EcoStudy.Models.Chapter> ?? new List<EcoStudy.Models.Chapter>();
+}
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb small">
+        <li class="breadcrumb-item"><a asp-controller="Teacher" asp-action="Dashboard" class="text-decoration-none">Dashboard</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Teacher" asp-action="ImportantQuestions" class="text-decoration-none">Important Questions</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Edit Question #@Model.Id</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="custom-card p-4 p-md-5">
+            <!-- Header -->
+            <div class="d-flex align-items-center gap-3 pb-4 border-bottom mb-4">
+                <div class="rounded-4 bg-warning bg-opacity-10 text-warning p-3 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+                    <i class="bi bi-pencil-square fs-3 text-warning"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold text-dark mb-1">Edit Important Question #@Model.Id</h3>
+                    <p class="text-muted small mb-0">Modify question statement, marks weightage, or solution guidance.</p>
+                </div>
+            </div>
+
+            <form asp-controller="Teacher" asp-action="EditQuestion" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CreatedAt" />
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 small mb-4" role="alert"></div>
+
+                <!-- Chapter and Question Type Row -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label asp-for="ChapterId" class="form-label fw-bold small text-secondary">
+                            Chapter <span class="text-danger">*</span>
+                        </label>
+                        <select asp-for="ChapterId" class="form-select form-control-lg fs-6" required>
+                            <option value="">-- Select Chapter --</option>
+                            @foreach (var ch in chapters)
+                            {
+                                <option value="@ch.Id" selected="@(Model.ChapterId == ch.Id)">
+                                    Chapter @ch.ChapterNumber: @ch.Name
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="ChapterId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="QuestionType" class="form-label fw-bold small text-secondary">
+                            Question Type <span class="text-danger">*</span>
+                        </label>
+                        <select asp-for="QuestionType" class="form-select form-control-lg fs-6" required>
+                            <option value="Short" selected="@(Model.QuestionType == "Short")">📝 Short Question</option>
+                            <option value="Long" selected="@(Model.QuestionType == "Long")">📄 Long Question</option>
+                            <option value="Numerical" selected="@(Model.QuestionType == "Numerical")">🔢 Numerical Question</option>
+                        </select>
+                        <span asp-validation-for="QuestionType" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Question Text -->
+                <div class="mb-4">
+                    <label asp-for="Question" class="form-label fw-bold small text-secondary">
+                        Question Statement <span class="text-danger">*</span>
+                    </label>
+                    <textarea asp-for="Question" class="form-control" rows="4" required></textarea>
+                    <span asp-validation-for="Question" class="text-danger small"></span>
+                </div>
+
+                <!-- Marks, Difficulty, and Exam Reference Row -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label asp-for="Marks" class="form-label fw-bold small text-secondary">
+                            Marks Weightage <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-star"></i></span>
+                            <input asp-for="Marks" type="number" class="form-control" min="1" max="50" required />
+                        </div>
+                        <span asp-validation-for="Marks" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="DifficultyLevel" class="form-label fw-bold small text-secondary">Difficulty Level</label>
+                        <select asp-for="DifficultyLevel" class="form-select">
+                            <option value="Easy" selected="@(Model.DifficultyLevel == "Easy")">Easy</option>
+                            <option value="Medium" selected="@(Model.DifficultyLevel == "Medium")">Medium</option>
+                            <option value="Hard" selected="@(Model.DifficultyLevel == "Hard")">Hard</option>
+                        </select>
+                        <span asp-validation-for="DifficultyLevel" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="ExamReference" class="form-label fw-bold small text-secondary">Exam Reference / Year</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted"><i class="bi bi-tag"></i></span>
+                            <input asp-for="ExamReference" class="form-control" placeholder="e.g. Board Exam 2023" />
+                        </div>
+                        <span asp-validation-for="ExamReference" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Answer Hint / Solution Key -->
+                <div class="mb-4">
+                    <label asp-for="AnswerHint" class="form-label fw-bold small text-secondary">
+                        <i class="bi bi-lightbulb text-warning me-1"></i> Solution Outline / Key Points / Steps
+                    </label>
+                    <textarea asp-for="AnswerHint" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="AnswerHint" class="text-danger small"></span>
+                </div>
+
+                <!-- Timestamps info -->
+                <div class="p-3 bg-light rounded-3 text-muted small mb-4">
+                    <div><i class="bi bi-calendar-event me-1"></i><strong>Created:</strong> @Model.CreatedAt.ToString("MMMM dd, yyyy 'at' hh:mm tt") UTC</div>
+                    @if (Model.UpdatedAt.HasValue)
+                    {
+                        <div class="mt-1"><i class="bi bi-pencil me-1"></i><strong>Last Updated:</strong> @Model.UpdatedAt.Value.ToString("MMMM dd, yyyy 'at' hh:mm tt") UTC</div>
+                    }
+                </div>
+
+                <!-- Form Action Buttons -->
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <a asp-controller="Teacher" asp-action="ImportantQuestions" asp-route-chapterId="@Model.ChapterId" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary-custom px-4 py-2">
+                        <i class="bi bi-check-lg me-1"></i> Update Question
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

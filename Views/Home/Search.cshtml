@@ -1,0 +1,381 @@
+@model EcoStudy.Models.ViewModels.GlobalSearchViewModel
+
+@{
+    ViewData["Title"] = string.IsNullOrWhiteSpace(Model.SearchTerm) ? "Global Search" : $"Search: {Model.SearchTerm}";
+    Layout = User.Identity?.IsAuthenticated == true ? "_DashboardLayout" : "_Layout";
+    var isTeacher = User.IsInRole("Teacher");
+    var isStudent = User.IsInRole("Student");
+}
+
+<div class="container py-4">
+    <!-- Search Header -->
+    <div class="mb-4">
+        <h2 class="fw-bold text-dark mb-1">
+            <i class="bi bi-search text-primary me-2"></i>Global Search
+        </h2>
+        <p class="text-muted small mb-0">Search across curriculum chapters, published study notes, and important examination questions.</p>
+    </div>
+
+    <!-- Search Form -->
+    <div class="custom-card p-3 mb-4 shadow-sm">
+        <form method="get" asp-controller="Home" asp-action="Search" class="row g-2 align-items-center">
+            <div class="col-md-10 col-sm-9">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-white border-end-0 text-muted">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" name="q" class="form-control border-start-0 ps-0 fs-6" 
+                           placeholder="Type to search chapters, notes, questions, formulas (e.g., 'Elasticity', 'Money Multiplier', 'PPC')..." 
+                           value="@Model.SearchTerm" autofocus />
+                    @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                    {
+                        <a asp-controller="Home" asp-action="Search" class="btn btn-outline-secondary d-flex align-items-center" title="Clear Search">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    }
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-3">
+                <button type="submit" class="btn btn-primary-custom w-100 py-2 fs-6">
+                    Search
+                </button>
+            </div>
+        </form>
+    </div>
+
+    @if (string.IsNullOrWhiteSpace(Model.SearchTerm))
+    {
+        <!-- Prompt state -->
+        <div class="custom-card p-5 text-center">
+            <div class="rounded-circle bg-primary bg-opacity-10 text-primary p-3 d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px;">
+                <i class="bi bi-compass fs-2"></i>
+            </div>
+            <h5 class="fw-bold text-dark">Search Economics Curriculum</h5>
+            <p class="text-muted small mb-3" style="max-width: 500px; margin: 0 auto;">
+                Enter a topic, chapter name, economic concept, or question keyword above to find matching learning resources.
+            </p>
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+                <a asp-controller="Home" asp-action="Search" asp-route-q="Demand" class="badge bg-light text-dark border text-decoration-none px-3 py-2">Try "Demand"</a>
+                <a asp-controller="Home" asp-action="Search" asp-route-q="Elasticity" class="badge bg-light text-dark border text-decoration-none px-3 py-2">Try "Elasticity"</a>
+                <a asp-controller="Home" asp-action="Search" asp-route-q="National Income" class="badge bg-light text-dark border text-decoration-none px-3 py-2">Try "National Income"</a>
+                <a asp-controller="Home" asp-action="Search" asp-route-q="Banking" class="badge bg-light text-dark border text-decoration-none px-3 py-2">Try "Banking"</a>
+            </div>
+        </div>
+    }
+    else if (Model.TotalResults == 0)
+    {
+        <!-- Empty Results -->
+        <div class="custom-card p-5 text-center">
+            <div class="display-4 text-muted mb-3"><i class="bi bi-search-heart"></i></div>
+            <h5 class="fw-bold text-dark">No matches found for "@Model.SearchTerm"</h5>
+            <p class="text-muted small mb-4" style="max-width: 480px; margin: 0 auto;">
+                We couldn't find any chapters, study notes, or questions matching your search term. Try checking your spelling or using broader economic terms.
+            </p>
+            <a asp-controller="Home" asp-action="Search" class="btn btn-outline-primary btn-sm">Clear Search</a>
+        </div>
+    }
+    else
+    {
+        <!-- Results Summary & Tabs -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+            <div>
+                <span class="text-muted small">Found <strong>@Model.TotalResults</strong> matching result@(Model.TotalResults > 1 ? "s" : "") for "<strong>@Model.SearchTerm</strong>"</span>
+            </div>
+            <!-- Category Navigation Pills -->
+            <ul class="nav nav-pills gap-1 small" id="searchResultsTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active rounded-pill px-3 py-1" id="all-results-tab" data-bs-toggle="pill" data-bs-target="#all-results" type="button" role="tab">
+                        All Results (@Model.TotalResults)
+                    </button>
+                </li>
+                @if (Model.MatchingChapters.Any())
+                {
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill px-3 py-1" id="chapters-tab" data-bs-toggle="pill" data-bs-target="#chapters-results" type="button" role="tab">
+                            📖 Chapters (@Model.MatchingChapters.Count)
+                        </button>
+                    </li>
+                }
+                @if (Model.MatchingNotes.Any())
+                {
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill px-3 py-1" id="notes-tab" data-bs-toggle="pill" data-bs-target="#notes-results" type="button" role="tab">
+                            📄 Notes (@Model.MatchingNotes.Count)
+                        </button>
+                    </li>
+                }
+                @if (Model.MatchingQuestions.Any())
+                {
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link rounded-pill px-3 py-1" id="questions-tab" data-bs-toggle="pill" data-bs-target="#questions-results" type="button" role="tab">
+                            ⭐ Questions (@Model.MatchingQuestions.Count)
+                        </button>
+                    </li>
+                }
+            </ul>
+        </div>
+
+        <div class="tab-content" id="searchResultsTabContent">
+            <!-- Tab 1: All Results Combined -->
+            <div class="tab-pane fade show active" id="all-results" role="tabpanel" aria-labelledby="all-results-tab">
+                <!-- 1. Matching Chapters Section -->
+                @if (Model.MatchingChapters.Any())
+                {
+                    <div class="custom-card mb-4">
+                        <div class="custom-card-header">
+                            <h6 class="custom-card-title">
+                                <i class="bi bi-journal-bookmark-fill text-primary"></i> Matching Chapters (@Model.MatchingChapters.Count)
+                            </h6>
+                        </div>
+                        <div class="custom-card-body p-0">
+                            <div class="list-group list-group-flush">
+                                @foreach (var ch in Model.MatchingChapters)
+                                {
+                                    var chUrl = isTeacher 
+                                        ? Url.Action("ChapterDetails", "Teacher", new { id = ch.Id }) 
+                                        : Url.Action("ChapterDetails", "Student", new { id = ch.Id });
+
+                                    <div class="list-group-item p-3 hover-bg">
+                                        <div class="d-flex justify-content-between align-items-start gap-2">
+                                            <div>
+                                                <div class="d-flex align-items-center gap-2 mb-1">
+                                                    <span class="badge bg-dark rounded-pill">Chapter @ch.ChapterNumber</span>
+                                                    <span class="badge @(ch.SubjectArea == "Microeconomics" ? "badge-soft-primary" : "badge-soft-success")">
+                                                        @ch.SubjectArea
+                                                    </span>
+                                                </div>
+                                                <h6 class="fw-bold text-dark mb-1">
+                                                    <a href="@chUrl" class="text-decoration-none text-dark hover-primary">
+                                                        @ch.Name
+                                                    </a>
+                                                </h6>
+                                                <p class="text-secondary small mb-1" style="line-height: 1.5;">@ch.Description</p>
+                                                <div class="text-muted small">
+                                                    <span>@ch.Notes.Count Notes &bull; @ch.ImportantQuestions.Count Questions</span>
+                                                </div>
+                                            </div>
+                                            <a href="@chUrl" class="btn btn-outline-primary btn-sm flex-shrink-0">
+                                                Open Chapter <i class="bi bi-arrow-right"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- 2. Matching Notes Section -->
+                @if (Model.MatchingNotes.Any())
+                {
+                    <div class="custom-card mb-4">
+                        <div class="custom-card-header">
+                            <h6 class="custom-card-title">
+                                <i class="bi bi-file-earmark-text-fill text-info"></i> Matching Study Notes (@Model.MatchingNotes.Count)
+                            </h6>
+                        </div>
+                        <div class="custom-card-body p-0">
+                            <div class="list-group list-group-flush">
+                                @foreach (var note in Model.MatchingNotes)
+                                {
+                                    var noteUrl = isTeacher 
+                                        ? Url.Action("NoteDetails", "Teacher", new { id = note.Id }) 
+                                        : Url.Action("NoteDetails", "Student", new { id = note.Id });
+                                    var downloadUrl = isTeacher
+                                        ? Url.Action("DownloadNote", "Teacher", new { id = note.Id })
+                                        : Url.Action("DownloadNote", "Student", new { id = note.Id });
+
+                                    <div class="list-group-item p-3 hover-bg">
+                                        <div class="d-flex justify-content-between align-items-start gap-2">
+                                            <div>
+                                                <div class="d-flex align-items-center gap-2 mb-1">
+                                                    <span class="badge bg-secondary text-uppercase">@note.FileType.TrimStart('.')</span>
+                                                    <span class="badge bg-light text-dark border">Ch @(note.Chapter?.ChapterNumber): @(note.Chapter?.Name)</span>
+                                                </div>
+                                                <h6 class="fw-bold text-dark mb-1">
+                                                    <a href="@noteUrl" class="text-decoration-none text-dark hover-primary">
+                                                        @note.Title
+                                                    </a>
+                                                </h6>
+                                                @if (!string.IsNullOrEmpty(note.Description))
+                                                {
+                                                    <p class="text-secondary small mb-1">@note.Description</p>
+                                                }
+                                                <div class="text-muted small">
+                                                    <span><i class="bi bi-paperclip me-1"></i>@note.FileName</span>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex gap-2 flex-shrink-0">
+                                                <a href="@downloadUrl" class="btn btn-primary-custom btn-sm">
+                                                    <i class="bi bi-download"></i>
+                                                </a>
+                                                <a href="@noteUrl" class="btn btn-outline-secondary btn-sm">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- 3. Matching Important Questions Section -->
+                @if (Model.MatchingQuestions.Any())
+                {
+                    <div class="custom-card mb-4">
+                        <div class="custom-card-header">
+                            <h6 class="custom-card-title">
+                                <i class="bi bi-star-fill text-warning"></i> Matching Important Questions (@Model.MatchingQuestions.Count)
+                            </h6>
+                        </div>
+                        <div class="custom-card-body p-0">
+                            <div class="list-group list-group-flush">
+                                @foreach (var q in Model.MatchingQuestions)
+                                {
+                                    var typeBadge = q.QuestionType switch
+                                    {
+                                        "Short" => "bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25",
+                                        "Long" => "bg-secondary text-white",
+                                        "Numerical" => "bg-success bg-opacity-10 text-success border border-success border-opacity-25",
+                                        _ => "bg-light text-dark border"
+                                    };
+
+                                    var chUrl = isTeacher 
+                                        ? Url.Action("ChapterDetails", "Teacher", new { id = q.ChapterId }) 
+                                        : Url.Action("ChapterDetails", "Student", new { id = q.ChapterId });
+
+                                    <div class="list-group-item p-3 hover-bg">
+                                        <div class="d-flex justify-content-between align-items-start gap-2">
+                                            <div>
+                                                <div class="d-flex align-items-center gap-2 mb-1">
+                                                    <span class="badge @typeBadge" style="@(q.QuestionType == "Long" ? "background-color: #7c3aed !important;" : "")">
+                                                        @q.QuestionType Question
+                                                    </span>
+                                                    <span class="badge bg-light text-dark border">@q.Marks Marks</span>
+                                                    <span class="badge bg-light text-secondary border">Ch @(q.Chapter?.ChapterNumber): @(q.Chapter?.Name)</span>
+                                                </div>
+                                                <h6 class="fw-bold text-dark mb-1" style="line-height: 1.5;">@q.Question</h6>
+                                                @if (!string.IsNullOrWhiteSpace(q.AnswerHint))
+                                                {
+                                                    <div class="p-2 px-3 bg-light rounded-3 border-start border-3 border-warning small text-secondary mt-2">
+                                                        <strong class="text-dark">Key Point / Hint:</strong> @q.AnswerHint
+                                                    </div>
+                                                }
+                                            </div>
+                                            <a href="@chUrl" class="btn btn-outline-primary btn-sm flex-shrink-0">
+                                                View in Chapter <i class="bi bi-arrow-right"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Tab 2: Chapters Only -->
+            <div class="tab-pane fade" id="chapters-results" role="tabpanel" aria-labelledby="chapters-tab">
+                <div class="row g-3">
+                    @foreach (var ch in Model.MatchingChapters)
+                    {
+                        var chUrl = isTeacher 
+                            ? Url.Action("ChapterDetails", "Teacher", new { id = ch.Id }) 
+                            : Url.Action("ChapterDetails", "Student", new { id = ch.Id });
+
+                        <div class="col-md-6">
+                            <div class="custom-card h-100 p-4 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="badge bg-dark rounded-pill">Chapter @ch.ChapterNumber</span>
+                                        <span class="badge @(ch.SubjectArea == "Microeconomics" ? "badge-soft-primary" : "badge-soft-success")">
+                                            @ch.SubjectArea
+                                        </span>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-2">@ch.Name</h5>
+                                    <p class="text-secondary small mb-3">@ch.Description</p>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                    <span class="text-muted small">@ch.Notes.Count Notes &bull; @ch.ImportantQuestions.Count Questions</span>
+                                    <a href="@chUrl" class="btn btn-outline-primary btn-sm">Open Chapter</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Tab 3: Notes Only -->
+            <div class="tab-pane fade" id="notes-results" role="tabpanel" aria-labelledby="notes-tab">
+                <div class="row g-3">
+                    @foreach (var note in Model.MatchingNotes)
+                    {
+                        var noteUrl = isTeacher 
+                            ? Url.Action("NoteDetails", "Teacher", new { id = note.Id }) 
+                            : Url.Action("NoteDetails", "Student", new { id = note.Id });
+                        var downloadUrl = isTeacher
+                            ? Url.Action("DownloadNote", "Teacher", new { id = note.Id })
+                            : Url.Action("DownloadNote", "Student", new { id = note.Id });
+
+                        <div class="col-md-6">
+                            <div class="custom-card h-100 p-4 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="badge bg-secondary text-uppercase">@note.FileType.TrimStart('.')</span>
+                                        <span class="badge bg-light text-dark border">Ch @(note.Chapter?.ChapterNumber)</span>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-2">@note.Title</h5>
+                                    <p class="text-secondary small mb-3">@note.Description</p>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                                    <span class="text-muted small"><i class="bi bi-paperclip me-1"></i>@note.FileName</span>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="@downloadUrl" class="btn btn-primary-custom">Download</a>
+                                        <a href="@noteUrl" class="btn btn-outline-secondary">Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Tab 4: Questions Only -->
+            <div class="tab-pane fade" id="questions-results" role="tabpanel" aria-labelledby="questions-tab">
+                <div class="row g-3">
+                    @foreach (var q in Model.MatchingQuestions)
+                    {
+                        var chUrl = isTeacher 
+                            ? Url.Action("ChapterDetails", "Teacher", new { id = q.ChapterId }) 
+                            : Url.Action("ChapterDetails", "Student", new { id = q.ChapterId });
+
+                        <div class="col-md-6">
+                            <div class="custom-card h-100 p-4 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">@q.QuestionType</span>
+                                        <span class="badge bg-light text-dark border">@q.Marks Marks</span>
+                                        <span class="badge bg-dark rounded-pill text-white">Ch @(q.Chapter?.ChapterNumber)</span>
+                                    </div>
+                                    <h6 class="fw-bold text-dark mb-2" style="line-height: 1.5;">@q.Question</h6>
+                                    @if (!string.IsNullOrWhiteSpace(q.AnswerHint))
+                                    {
+                                        <div class="p-2 px-3 bg-light rounded-3 border-start border-3 border-warning small text-secondary">
+                                            @q.AnswerHint
+                                        </div>
+                                    }
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-2">
+                                    <span class="text-muted small">@(q.Chapter?.Name)</span>
+                                    <a href="@chUrl" class="btn btn-outline-primary btn-sm">Open Chapter</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
